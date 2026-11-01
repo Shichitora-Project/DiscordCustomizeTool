@@ -18,6 +18,8 @@ You can custom of your profile and rearrange their order for the badges via the 
 
 The script for the Chrome DevTools console can be found [here](https://github.com/seihyoumirai/DiscordProfileCustomizeTool/blob/main/chrome/script.js).
 
+No additional extensions or scripts, such as Vencode, are required.
+
 ---
 
 ## Images
