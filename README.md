@@ -14,6 +14,10 @@ To overwrite a field, it must already exist, and to overwrite a badge, you must 
 
 You can custom of your profile and rearrange their order for the badges via the extension's pop-up menu.
 
+### Chrome console
+
+The script for the Chrome DevTools console can be found [here](https://github.com/seihyoumirai/DiscordProfileCustomizeTool/blob/main/chrome/script.js).
+
 ---
 
 ## Images
