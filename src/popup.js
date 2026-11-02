@@ -1,41 +1,28 @@
 const badgeBaseUrl = 'https://cdn.discordapp.com/badge-icons/';
 const uiTranslations = {
-    ja: { appTitle:'Discord All Badges', settings:'設定', language:'言語', staffMode:'スタッフモード', override:'バッジを上書き', serverTagToggle:'サーバータグを上書き', serverTagBadge:'サーバータグのバッジ', serverTagText:'サーバータグの文字', serverTagPlaceholder:'任意の文字', serverTagOff:'なし', standard:'通常バッジ', deleted:'削除済みバッジ', custom:'カスタムバッジ', order:'有効なバッジの表示順（ドラッグして変更）', credit:'Made by 清冰みらい' },
-    en: { appTitle:'Discord All Badges', settings:'Settings', language:'Language', staffMode:'Staff mode', override:'Override badges', serverTagToggle:'Override server tag', serverTagBadge:'Server tag badge', serverTagText:'Server tag text', serverTagPlaceholder:'Custom text', serverTagOff:'None', standard:'Standard badges', deleted:'Deleted badges', custom:'Custom badges', order:'Enabled badge order (drag to change)', credit:'Made by 清冰みらい' },
-    ko: { settings:'설정', language:'언어', staffMode:'스태프 모드', override:'배지 덮어쓰기', serverTagToggle:'서버 태그 사용', serverTagBadge:'서버 태그 배지', serverTagText:'서버 태그 문구', serverTagPlaceholder:'원하는 문구', serverTagOff:'없음', standard:'일반 배지', deleted:'삭제된 배지', custom:'사용자 지정 배지', order:'활성 배지 순서 (드래그하여 변경)', credit:'Made by 清冰みらい' },
-    'zh-CN': { settings:'设置', language:'语言', staffMode:'员工模式', override:'覆盖徽章', serverTagToggle:'启用服务器标签', serverTagBadge:'服务器标签徽章', serverTagText:'服务器标签文字', serverTagPlaceholder:'自定义文字', serverTagOff:'无', standard:'普通徽章', deleted:'已删除徽章', custom:'自定义徽章', order:'已启用徽章顺序（拖动以更改）', credit:'Made by 清冰みらい' },
-    'zh-TW': { settings:'設定', language:'語言', staffMode:'員工模式', override:'覆蓋徽章', serverTagToggle:'啟用伺服器標籤', serverTagBadge:'伺服器標籤徽章', serverTagText:'伺服器標籤文字', serverTagPlaceholder:'自訂文字', serverTagOff:'無', standard:'一般徽章', deleted:'已刪除徽章', custom:'自訂徽章', order:'已啟用徽章順序（拖曳以變更）', credit:'Made by 清冰みらい' },
-    fr: { settings:'Paramètres', language:'Langue', staffMode:'Mode staff', override:'Remplacer les badges', serverTagToggle:'Activer le tag serveur', serverTagBadge:'Badge du tag serveur', serverTagText:'Texte du tag serveur', serverTagPlaceholder:'Texte personnalisé', serverTagOff:'Aucun', standard:'Badges standard', deleted:'Badges supprimés', custom:'Badges personnalisés', order:'Ordre des badges activés (glisser pour modifier)', credit:'Made by 清冰みらい' },
-    de: { settings:'Einstellungen', language:'Sprache', staffMode:'Mitarbeitermodus', override:'Badges überschreiben', serverTagToggle:'Server-Tag aktivieren', serverTagBadge:'Server-Tag-Badge', serverTagText:'Server-Tag-Text', serverTagPlaceholder:'Eigener Text', serverTagOff:'Keiner', standard:'Standard-Badges', deleted:'Entfernte Badges', custom:'Benutzerdefinierte Badges', order:'Reihenfolge aktivierter Badges (zum Ändern ziehen)', credit:'Made by 清冰みらい' },
-    es: { settings:'Configuración', language:'Idioma', staffMode:'Modo de personal', override:'Sobrescribir insignias', serverTagToggle:'Activar etiqueta del servidor', serverTagBadge:'Insignia de etiqueta del servidor', serverTagText:'Texto de etiqueta', serverTagPlaceholder:'Texto personalizado', serverTagOff:'Ninguna', standard:'Insignias estándar', deleted:'Insignias eliminadas', custom:'Insignias personalizadas', order:'Orden de insignias activas (arrastra para cambiar)', credit:'Made by 清冰みらい' },
-    pt: { settings:'Configurações', language:'Idioma', staffMode:'Modo de equipe', override:'Substituir emblemas', serverTagToggle:'Ativar tag do servidor', serverTagBadge:'Emblema da tag do servidor', serverTagText:'Texto da tag', serverTagPlaceholder:'Texto personalizado', serverTagOff:'Nenhum', standard:'Emblemas padrão', deleted:'Emblemas removidos', custom:'Emblemas personalizados', order:'Ordem dos emblemas ativos (arraste para alterar)', credit:'Made by 清冰みらい' },
-    ru: { settings:'Настройки', language:'Язык', staffMode:'Режим персонала', override:'Заменять значки', serverTagToggle:'Включить тег сервера', serverTagBadge:'Значок тега сервера', serverTagText:'Текст тега сервера', serverTagPlaceholder:'Свой текст', serverTagOff:'Нет', standard:'Обычные значки', deleted:'Удалённые значки', custom:'Пользовательские значки', order:'Порядок активных значков (перетащите для изменения)', credit:'Made by 清冰みらい' }
+    ja: { appTitle:'Discord Profile Customize Tool', settings:'設定', language:'言語', staffMode:'スタッフモード', override:'バッジを上書き', serverTagToggle:'サーバータグを上書き', serverTagBadge:'サーバータグのバッジ', serverTagText:'サーバータグの文字', serverTagPlaceholder:'任意の文字', serverTagOff:'なし', standard:'通常バッジ', deleted:'削除済みバッジ', custom:'カスタムバッジ', order:'有効なバッジの表示順（ドラッグして変更）', credit:'Made by 清冰みらい', uploadedBadges:'アップロードしたバッジ', uploadImages:'画像を追加（複数選択可）', uploadHint:'ここに画像をドラッグ＆ドロップ／クリックして選択 · PNG・JPG・WebP・GIF、5MB以下', localOnly:'ここで追加したバッジは、このブラウザーのプロフィール表示にだけ反映されます。', badgeName:'バッジ名', tooltipTitle:'ツールチップのタイトル', tooltipEyebrow:'ツールチップのサブタイトル', tooltipDescription:'ツールチップの説明', tooltipGraphic:'ツールチップ画像のURL', uploadTooltipGraphic:'画像をアップロード', badgeClickUrl:'バッジクリック時のリンクURL', italicTitle:'タイトルを斜体にする', editDetails:'詳細を編集', enabled:'表示する', disabled:'非表示', remove:'削除', saved:'保存済み', uploadError:'画像を読み込めませんでした。PNG、JPEG、WebP、GIF形式で5MB以下の画像を選択してください。', uploadLimit:'カスタム画像は最大20個まで追加できます。' },
+    en: { appTitle:'Discord Profile Customize Tool', settings:'Settings', language:'Language', staffMode:'Staff mode', override:'Override badges', serverTagToggle:'Override server tag', serverTagBadge:'Server tag badge', serverTagText:'Server tag text', serverTagPlaceholder:'Custom text', serverTagOff:'None', standard:'Standard badges', deleted:'Deleted badges', custom:'Custom badges', order:'Enabled badge order (drag to change)', credit:'Made by SeihyouMirai', uploadedBadges:'Uploaded badges', uploadImages:'Add images (multiple selection supported)', uploadHint:'Drop images here or click to browse · PNG, JPG, WebP, GIF · up to 5 MB', localOnly:'Uploaded badges only affect profile previews in this browser.', badgeName:'Badge name', tooltipTitle:'Tooltip title', tooltipEyebrow:'Tooltip subtitle', tooltipDescription:'Tooltip description', tooltipGraphic:'Tooltip image URL', uploadTooltipGraphic:'Upload image', badgeClickUrl:'Badge click URL', italicTitle:'Italic title style', editDetails:'Edit details', enabled:'Show', disabled:'Hidden', remove:'Remove', saved:'Saved', uploadError:'Could not read the image. Choose a PNG, JPEG, WebP, or GIF image smaller than 5 MB.', uploadLimit:'You can add up to 20 custom images.' }
 };
 const extraTranslations = {
-    ja: { categoryGeneral:'一般設定', categoryBadges:'バッジ', categoryServerTag:'サーバータグ', categoryProfile:'プロフィール', pronounsEnabled:'代名詞を上書き', pronounsText:'代名詞', usernameEnabled:'ユーザー名を上書き', usernameText:'ユーザー名', bioEnabled:'自己紹介を上書き', bioText:'自己紹介', profilePlaceholder:'任意の文字' },
-    en: { categoryGeneral:'General', categoryBadges:'Badges', categoryServerTag:'Server tag', categoryProfile:'Profile', pronounsEnabled:'Override pronouns', pronounsText:'Pronouns', usernameEnabled:'Override username', usernameText:'Username', bioEnabled:'Override bio', bioText:'Bio', profilePlaceholder:'Custom text' },
-    ko: { categoryGeneral:'일반 설정', categoryBadges:'배지', categoryServerTag:'서버 태그', categoryProfile:'프로필', pronounsEnabled:'대명사 덮어쓰기', pronounsText:'대명사', usernameEnabled:'사용자 이름 덮어쓰기', usernameText:'사용자 이름', bioEnabled:'소개 덮어쓰기', bioText:'소개', profilePlaceholder:'원하는 문구' },
-    'zh-CN': { categoryGeneral:'常规设置', categoryBadges:'徽章', categoryServerTag:'服务器标签', categoryProfile:'个人资料', pronounsEnabled:'覆盖代词', pronounsText:'代词', usernameEnabled:'覆盖用户名', usernameText:'用户名', bioEnabled:'覆盖简介', bioText:'简介', profilePlaceholder:'自定义文字' },
-    'zh-TW': { categoryGeneral:'一般設定', categoryBadges:'徽章', categoryServerTag:'伺服器標籤', categoryProfile:'個人資料', pronounsEnabled:'覆蓋代名詞', pronounsText:'代名詞', usernameEnabled:'覆蓋使用者名稱', usernameText:'使用者名稱', bioEnabled:'覆蓋自我介紹', bioText:'自我介紹', profilePlaceholder:'自訂文字' },
-    fr: { categoryGeneral:'Général', categoryBadges:'Badges', categoryServerTag:'Tag serveur', categoryProfile:'Profil', pronounsEnabled:'Remplacer les pronoms', pronounsText:'Pronoms', usernameEnabled:'Remplacer le nom', usernameText:'Nom d’utilisateur', bioEnabled:'Remplacer la bio', bioText:'Bio', profilePlaceholder:'Texte personnalisé' },
-    de: { categoryGeneral:'Allgemein', categoryBadges:'Badges', categoryServerTag:'Server-Tag', categoryProfile:'Profil', pronounsEnabled:'Pronomen überschreiben', pronounsText:'Pronomen', usernameEnabled:'Nutzernamen überschreiben', usernameText:'Nutzername', bioEnabled:'Bio überschreiben', bioText:'Bio', profilePlaceholder:'Eigener Text' },
-    es: { categoryGeneral:'General', categoryBadges:'Insignias', categoryServerTag:'Etiqueta del servidor', categoryProfile:'Perfil', pronounsEnabled:'Sobrescribir pronombres', pronounsText:'Pronombres', usernameEnabled:'Sobrescribir nombre', usernameText:'Nombre de usuario', bioEnabled:'Sobrescribir biografía', bioText:'Biografía', profilePlaceholder:'Texto personalizado' },
-    pt: { categoryGeneral:'Geral', categoryBadges:'Emblemas', categoryServerTag:'Tag do servidor', categoryProfile:'Perfil', pronounsEnabled:'Substituir pronomes', pronounsText:'Pronomes', usernameEnabled:'Substituir usuário', usernameText:'Nome de usuário', bioEnabled:'Substituir biografia', bioText:'Biografia', profilePlaceholder:'Texto personalizado' },
-    ru: { categoryGeneral:'Общие', categoryBadges:'Значки', categoryServerTag:'Тег сервера', categoryProfile:'Профиль', pronounsEnabled:'Заменить местоимения', pronounsText:'Местоимения', usernameEnabled:'Заменить имя', usernameText:'Имя пользователя', bioEnabled:'Заменить описание', bioText:'Описание', profilePlaceholder:'Свой текст' }
+    ja: { categoryGeneral:'一般設定', categoryBadges:'バッジ', categoryServerTag:'サーバータグ', categoryProfile:'プロフィール', badgeOmission:'バッジの省略', pronounsEnabled:'代名詞を上書き', pronounsText:'代名詞', usernameEnabled:'ユーザー名を上書き', usernameText:'ユーザー名', bioEnabled:'自己紹介を上書き', bioText:'自己紹介', profilePlaceholder:'任意の文字' },
+    en: { categoryGeneral:'General', categoryBadges:'Badges', categoryServerTag:'Server tag', categoryProfile:'Profile', badgeOmission:'Collapse badges', pronounsEnabled:'Override pronouns', pronounsText:'Pronouns', usernameEnabled:'Override username', usernameText:'Username', bioEnabled:'Override bio', bioText:'Bio', profilePlaceholder:'Custom text' }
 };
 let currentLanguage = 'ja';
 
 function applyLanguage(language) {
-    currentLanguage = uiTranslations[language] ? language : 'en';
+    currentLanguage = language === 'en' ? 'en' : 'ja';
     const strings = { ...uiTranslations[currentLanguage], ...extraTranslations[currentLanguage] };
-    document.title = strings.appTitle || 'Discord All Badges';
-    document.querySelectorAll('[data-i18n]').forEach(element => { element.textContent = strings[element.dataset.i18n] ?? uiTranslations.en[element.dataset.i18n] ?? element.textContent; });
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => { element.placeholder = strings[element.dataset.i18nPlaceholder] ?? uiTranslations.en[element.dataset.i18nPlaceholder] ?? element.placeholder; });
+    document.title = strings.appTitle;
+    document.querySelectorAll('[data-i18n]').forEach(element => { element.textContent = strings[element.dataset.i18n] ?? element.textContent; });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => { element.placeholder = strings[element.dataset.i18nPlaceholder] ?? element.placeholder; });
     const serverTagBadgeSelect = document.getElementById('serverTagBadgeSelect');
     if (serverTagBadgeSelect?.options.length) serverTagBadgeSelect.options[0].textContent = strings.serverTagOff;
     const order = document.getElementById('enabledBadgeOrder');
     if (order) { order.title = strings.order; order.setAttribute('aria-label', strings.order); }
     document.documentElement.lang = currentLanguage;
+    document.querySelectorAll('[data-custom-i18n]').forEach(element => { element.textContent = strings[element.dataset.customI18n] ?? element.textContent; });
+    const uploadedList = document.getElementById('uploadedBadgeList');
+    if (uploadedList && typeof uploadedBadges !== 'undefined') renderUploadedBadges(uploadedList, popupEnabledHashes);
 }
 
 const defaultBadgeNames = new Set([
@@ -325,9 +312,16 @@ const allBadgesNames = [ ...deletedBadgeNames, ...customBadgesNames ];
 const officialBadges = badgeDetails.filter(badge => !allBadgesNames.includes(badge.name));
 
 let draggedItem = null;
+let uploadedBadges = [];
+let badgeEdits = {};
+let popupEnabledHashes = [];
+let popupBadgeOrder = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     const badgeList = document.getElementById('badgeList');
+    const uploadedBadgeList = document.getElementById('uploadedBadgeList');
+    const customBadgeFiles = document.getElementById('customBadgeFiles');
+    const badgeUploadDropzone = document.getElementById('badgeUploadDropzone');
     const enabledBadgeOrder = document.getElementById('enabledBadgeOrder');
     const languageSelect = document.getElementById('languageSelect');
     const overrideToggle = document.getElementById('overrideToggle');
@@ -363,14 +357,14 @@ document.addEventListener('DOMContentLoaded', () => {
         option.textContent = badge.name;
         serverTagBadgeSelect?.appendChild(option);
     });
-    chrome.storage.local.get(['enabledHashes', 'badgeOrder', 'activeBadgeOrder', 'language', 'overrideEnabled', 'badgeOmissionEnabled', 'staffModeEnabled', 'serverTagEnabled', 'serverTagBadgeHash', 'serverTagText', 'popupCategory', ...profileControls], (data) => {
+    chrome.storage.local.get(['enabledHashes', 'badgeOrder', 'activeBadgeOrder', 'language', 'overrideEnabled', 'badgeOmissionEnabled', 'staffModeEnabled', 'serverTagEnabled', 'serverTagBadgeHash', 'serverTagText', 'popupCategory', 'customBadges', 'badgeEdits', ...profileControls], (data) => {
         if (categorySelect) {
             categorySelect.value = ['general', 'badges', 'serverTag', 'profile'].includes(data.popupCategory) ? data.popupCategory : 'general';
             showCategory(categorySelect.value);
         }
         if (languageSelect) {
-            languageSelect.value = uiTranslations[data.language] ? data.language : 'ja';
-            applyLanguage(languageSelect.value);
+            languageSelect.value = data.language === 'en' ? 'en' : 'ja';
+            applyLanguage(languageSelect.value === 'en' ? 'en' : 'ja');
         }
         if (serverTagBadgeSelect) serverTagBadgeSelect.value = data.serverTagBadgeHash || '';
         if (serverTagTextInput) serverTagTextInput.value = data.serverTagText || '';
@@ -388,19 +382,38 @@ document.addEventListener('DOMContentLoaded', () => {
             if (control) control.value = data[id] || '';
         }
         if (typeof data.staffModeEnabled !== 'boolean') chrome.storage.local.set({ staffModeEnabled: true });
+        uploadedBadges = Array.isArray(data.customBadges) ? data.customBadges : [];
+        badgeEdits = data.badgeEdits && typeof data.badgeEdits === 'object' ? data.badgeEdits : {};
+        let migratedLegacyBadgeLinks = false;
+        uploadedBadges.forEach(badge => {
+            if (!badge || typeof badge !== 'object') return;
+            if (!Object.prototype.hasOwnProperty.call(badge, 'href') && typeof badge.tooltipHref === 'string') badge.href = badge.tooltipHref;
+            if ('tooltipHref' in badge) { delete badge.tooltipHref; migratedLegacyBadgeLinks = true; }
+            if ('tooltipLinkText' in badge) { delete badge.tooltipLinkText; migratedLegacyBadgeLinks = true; }
+        });
+        Object.values(badgeEdits).forEach(edit => {
+            if (!edit || typeof edit !== 'object') return;
+            if (!Object.prototype.hasOwnProperty.call(edit, 'href') && typeof edit.tooltipHref === 'string') edit.href = edit.tooltipHref;
+            if ('tooltipHref' in edit) { delete edit.tooltipHref; migratedLegacyBadgeLinks = true; }
+            if ('tooltipLinkText' in edit) { delete edit.tooltipLinkText; migratedLegacyBadgeLinks = true; }
+        });
+        if (migratedLegacyBadgeLinks) chrome.storage.local.set({ customBadges: uploadedBadges, badgeEdits });
+        const allBadges = [...badgeDetails, ...uploadedBadges];
         const enabledHashes = data.enabledHashes ?? badgeDetails
             .filter(badge => defaultBadgeNames.has(badge.name))
             .map(badge => badge.hash);
         const activeBadgeOrder = Array.isArray(data.activeBadgeOrder)
             ? data.activeBadgeOrder
-            : badgeDetails.filter(badge => enabledHashes.includes(badge.hash)).map(badge => badge.hash);
+            : allBadges.filter(badge => enabledHashes.includes(badge.hash)).map(badge => badge.hash);
+        popupEnabledHashes = [...enabledHashes];
+        popupBadgeOrder = Array.isArray(data.badgeOrder) ? [...data.badgeOrder] : allBadges.map(badge => badge.hash);
         renderEnabledBadgeOrder(enabledBadgeOrder, enabledHashes, activeBadgeOrder);
-        const badgeOrder = badgeDetails.map(badge => badge.hash);
+        const badgeOrder = allBadges.map(badge => badge.hash);
         if (!Array.isArray(data.activeBadgeOrder)) {
             chrome.storage.local.set({ activeBadgeOrder, badgeOrder });
         }
         
-        const orderedBadges = [...badgeDetails].sort((a, b) => {
+        const orderedBadges = [...allBadges].sort((a, b) => {
             let indexA = badgeOrder.indexOf(a.hash);
             let indexB = badgeOrder.indexOf(b.hash);
             if (indexA === -1) indexA = 999;
@@ -414,58 +427,21 @@ document.addEventListener('DOMContentLoaded', () => {
             { title: uiTranslations[currentLanguage].custom, badges: customBadges }
         ];
 
-        sections.forEach(({ title, badges }) => {
+        sections.forEach(({ title, badges }, sectionIndex) => {
             const section = createBadgeSection(title);
+            section.dataset.section = String(sectionIndex);
             badgeList.appendChild(section);
             badges
                 .filter(badge => orderedBadges.includes(badge))
                 .sort((a, b) => orderedBadges.indexOf(a) - orderedBadges.indexOf(b))
-                .forEach(badge => {
-            const label = document.createElement('label');
-            label.className = 'badge-item';
-            label.draggable = false;
-            
-            const img = document.createElement('img');
-            img.src = getBadgeImageUrl(badge.hash);
-            img.alt = badge.name;
-            
-            const textSpan = document.createElement('span');
-            textSpan.className = 'badge-text';
-            textSpan.textContent = badge.name;
-            
-            const switchLabel = document.createElement('label');
-            switchLabel.className = 'switch';
-            
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.value = badge.hash;
-            checkbox.checked = enabledHashes.includes(badge.hash);
-            
-            const sliderSpan = document.createElement('span');
-            sliderSpan.className = 'slider';
-            
-            switchLabel.appendChild(checkbox);
-            switchLabel.appendChild(sliderSpan);
-            
-            label.appendChild(img);
-            label.appendChild(textSpan);
-            label.appendChild(switchLabel);
-            
-            section.appendChild(label);
-            
-            checkbox.addEventListener('change', () => {
-                const selected = [...document.querySelectorAll('#badgeList input[type="checkbox"]')]
-                    .filter(input => input.checked).map(input => input.value);
-                renderEnabledBadgeOrder(enabledBadgeOrder, selected, getCurrentBadgeOrder(enabledBadgeOrder, badgeDetails.map(badge => badge.hash)));
-                saveSettings();
-            });
-                });
+                .forEach(badge => section.appendChild(createBadgeEditorCard(badge, false, enabledHashes)));
         });
+        renderUploadedBadges(uploadedBadgeList, enabledHashes);
+        updateUploadedCount();
         languageSelect?.addEventListener('change', () => {
             applyLanguage(languageSelect.value);
-            document.querySelectorAll('.badge-section h2').forEach((heading, index) => {
-                heading.textContent = [uiTranslations[currentLanguage].standard, uiTranslations[currentLanguage].deleted, uiTranslations[currentLanguage].custom][index];
-            });
+            renderBadgeSections(popupEnabledHashes);
+            renderUploadedBadges(uploadedBadgeList, popupEnabledHashes);
             chrome.storage.local.set({ language: currentLanguage });
         });
         overrideToggle?.addEventListener('change', () => {
@@ -489,6 +465,39 @@ document.addEventListener('DOMContentLoaded', () => {
         for (const id of ['pronounsText', 'usernameText', 'bioText']) {
             document.getElementById(id)?.addEventListener('input', event => chrome.storage.local.set({ [id]: event.target.value }));
         }
+        const addCustomBadgeFiles = async (fileList) => {
+            const files = [...(fileList || [])];
+            const strings = { ...uiTranslations[currentLanguage], ...extraTranslations[currentLanguage] };
+            for (const file of files) {
+                if (uploadedBadges.length >= 20) { alert(strings.uploadLimit); break; }
+                try {
+                    const imageData = await compressBadgeImage(file);
+                    const name = file.name.replace(/\.[^.]+$/, '') || 'Custom badge';
+                    const badge = { hash: `custom-${crypto.randomUUID()}`, name, imageData, tooltipTitle: name, tooltipEyebrow: '', description: '', tooltipGraphic: '', tooltipGraphicData: '', href: '', custom: true };
+                    uploadedBadges.push(badge);
+                    popupEnabledHashes.push(badge.hash);
+                    popupBadgeOrder.push(badge.hash);
+                } catch (error) { alert(strings.uploadError); }
+            }
+            renderUploadedBadges(uploadedBadgeList, popupEnabledHashes);
+            updateUploadedCount();
+            renderEnabledBadgeOrder(enabledBadgeOrder, popupEnabledHashes, getCurrentBadgeOrder(enabledBadgeOrder, popupBadgeOrder));
+            saveSettings();
+        };
+        customBadgeFiles?.addEventListener('change', async () => {
+            const files = [...(customBadgeFiles.files || [])];
+            customBadgeFiles.value = '';
+            await addCustomBadgeFiles(files);
+        });
+        badgeUploadDropzone?.addEventListener('dragover', event => { event.preventDefault(); badgeUploadDropzone.classList.add('is-dragover'); });
+        badgeUploadDropzone?.addEventListener('dragleave', event => { if (!badgeUploadDropzone.contains(event.relatedTarget)) badgeUploadDropzone.classList.remove('is-dragover'); });
+        badgeUploadDropzone?.addEventListener('drop', async event => {
+            event.preventDefault(); badgeUploadDropzone.classList.remove('is-dragover');
+            await addCustomBadgeFiles([...event.dataTransfer.files]);
+        });
+        badgeUploadDropzone?.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); customBadgeFiles?.click(); }
+        });
     });
 });
 
@@ -502,7 +511,7 @@ function createBadgeSection(title) {
 }
 
 function getBadgeImageUrl(hashOrUrl) {
-    if (/^data:image\/(?:svg\+xml|png|webp);(charset=utf-8;)?base64,/i.test(hashOrUrl)) return hashOrUrl;
+    if (/^data:image\//i.test(hashOrUrl)) return hashOrUrl;
     if (/^https?:\/\//i.test(hashOrUrl)) return hashOrUrl;
     return badgeBaseUrl + hashOrUrl + '.png';
 }
@@ -541,7 +550,8 @@ function renderEnabledBadgeOrder(container, enabledHashes, previousOrder = []) {
     enabledHashes.forEach(hash => { if (!orderedHashes.includes(hash)) orderedHashes.push(hash); });
     container.replaceChildren();
     orderedHashes.forEach(hash => {
-        const badge = badgeDetails.find(item => item.hash === hash);
+        const sourceBadge = [...badgeDetails, ...uploadedBadges].find(item => item.hash === hash);
+        const badge = sourceBadge ? getEffectiveBadge(sourceBadge) : null;
         if (!badge) return;
         const item = document.createElement('div');
         item.className = 'order-badge';
@@ -549,7 +559,7 @@ function renderEnabledBadgeOrder(container, enabledHashes, previousOrder = []) {
         item.dataset.hash = hash;
         item.title = badge.name;
         const img = document.createElement('img');
-        img.src = getBadgeImageUrl(hash);
+        img.src = getBadgeImageUrl(badge.imageData || badge.hash);
         img.alt = badge.name;
         item.appendChild(img);
         addDragEvents(item);
@@ -557,15 +567,237 @@ function renderEnabledBadgeOrder(container, enabledHashes, previousOrder = []) {
     });
 }
 
-function saveSettings() {
-    const inputs = document.querySelectorAll('#badgeList input[type="checkbox"]');
-    const selectedHashes = [];
-    const enabledOrder = [...document.querySelectorAll('#enabledBadgeOrder .order-badge')].map(item => item.dataset.hash);
-    const badgeOrder = badgeDetails.map(badge => badge.hash);
-    inputs.forEach(input => {
-        if (input.checked) {
-            selectedHashes.push(input.value);
+
+async function compressBadgeImage(file, maxSize = 96) {
+    const allowed = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+    if (!allowed.includes(file.type) || file.size > 5 * 1024 * 1024) throw new Error('Unsupported image');
+    if (typeof createImageBitmap !== 'function') throw new Error('Image decoding is unavailable');
+    const bitmap = await createImageBitmap(file);
+    try {
+        const max = maxSize;
+        const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Canvas unavailable');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        let data = canvas.toDataURL('image/webp', 0.82);
+        if (!data.startsWith('data:image/webp')) data = canvas.toDataURL('image/png');
+        if (data.length > 50000) {
+            canvas.width = Math.max(1, Math.round(canvas.width * 0.67));
+            canvas.height = Math.max(1, Math.round(canvas.height * 0.67));
+            ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+            data = canvas.toDataURL('image/webp', 0.70);
         }
+        if (data.length > 50000) {
+            canvas.width = Math.max(1, Math.round(canvas.width * 0.5));
+            canvas.height = Math.max(1, Math.round(canvas.height * 0.5));
+            ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+            data = canvas.toDataURL('image/webp', 0.55);
+        }
+        if (data.length > 70000) throw new Error('Compressed image is too large');
+        return data;
+    } finally { bitmap.close?.(); }
+}
+
+function getEffectiveBadge(badge) {
+    return badge.custom ? badge : { ...badge, ...(badgeEdits[badge.hash] || {}) };
+}
+
+function updateUploadedCount() {
+    const count = document.getElementById('uploadedBadgeCount');
+    if (count) count.textContent = `${uploadedBadges.length}/20`;
+}
+
+function renderBadgeSections(enabledHashes = popupEnabledHashes) {
+    const list = document.getElementById('badgeList');
+    if (!list) return;
+    const sections = [
+        { title: uiTranslations[currentLanguage].standard, badges: officialBadges },
+        { title: uiTranslations[currentLanguage].deleted, badges: deletedBadges },
+        { title: uiTranslations[currentLanguage].custom, badges: customBadges }
+    ];
+    const all = [...badgeDetails, ...uploadedBadges];
+    const order = popupBadgeOrder.length ? popupBadgeOrder : all.map(item => item.hash);
+    list.replaceChildren();
+    sections.forEach(({ title, badges }, sectionIndex) => {
+        const section = createBadgeSection(title);
+        section.dataset.section = String(sectionIndex);
+        badges.filter(b => all.some(x => x.hash === b.hash))
+            .sort((a,b) => (order.indexOf(a.hash) < 0 ? 999999 : order.indexOf(a.hash)) - (order.indexOf(b.hash) < 0 ? 999999 : order.indexOf(b.hash)))
+            .forEach(badge => section.appendChild(createBadgeEditorCard(badge, false, enabledHashes)));
+        list.appendChild(section);
     });
-    chrome.storage.local.set({ 'enabledHashes': selectedHashes, 'badgeOrder': badgeOrder, 'activeBadgeOrder': enabledOrder });
+}
+
+function createField(labelText, control) {
+    const label = document.createElement('label');
+    const caption = document.createElement('span');
+    caption.textContent = labelText;
+    label.append(caption, control);
+    return label;
+}
+
+function createEditorInput(value, placeholder, type = 'text') {
+    const input = document.createElement('input');
+    input.type = type;
+    input.value = value || '';
+    input.placeholder = placeholder || '';
+    return input;
+}
+
+function createBadgeEditorCard(sourceBadge, isUploaded, enabledHashes = popupEnabledHashes) {
+    const badge = sourceBadge;
+    const view = getEffectiveBadge(sourceBadge);
+    const strings = uiTranslations[currentLanguage];
+    const card = document.createElement('article');
+    card.className = `badge-edit-card${isUploaded ? ' uploaded-badge-card' : ''}`;
+    card.dataset.hash = badge.hash;
+
+    const top = document.createElement('div');
+    top.className = 'badge-editor-top';
+    const details = document.createElement('details');
+    details.className = 'badge-edit-details';
+    const summary = document.createElement('summary');
+    const icon = document.createElement('img');
+    icon.src = getBadgeImageUrl(badge.imageData || badge.hash);
+    icon.alt = view.name || badge.name;
+    const summaryText = document.createElement('span');
+    summaryText.className = 'badge-edit-summary-name';
+    summaryText.textContent = view.name || badge.name;
+    const summaryHint = document.createElement('span');
+    summaryHint.className = 'badge-edit-summary-note';
+    summaryHint.textContent = strings.editDetails;
+    summary.append(icon, summaryText, summaryHint);
+    details.appendChild(summary);
+
+    const toggleLabel = document.createElement('label');
+    toggleLabel.className = 'badge-editor-toggle';
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox'; checkbox.value = badge.hash; checkbox.checked = enabledHashes.includes(badge.hash);
+    checkbox.setAttribute('aria-label', checkbox.checked ? strings.enabled : strings.disabled);
+    const switchWrap = document.createElement('span'); switchWrap.className = 'switch';
+    const slider = document.createElement('span'); slider.className = 'slider';
+    switchWrap.append(checkbox, slider);
+    const toggleText = document.createElement('span'); toggleText.className = 'toggle-state'; toggleText.textContent = checkbox.checked ? strings.enabled : strings.disabled;
+    toggleLabel.append(switchWrap, toggleText);
+    top.append(details, toggleLabel);
+    card.appendChild(top);
+
+    const fields = document.createElement('div');
+    fields.className = 'badge-edit-fields';
+    const persist = (key, value) => {
+        if (isUploaded) {
+            badge[key] = value;
+        } else {
+            badgeEdits[badge.hash] ||= {};
+            badgeEdits[badge.hash][key] = value;
+        }
+        if (key === 'name') {
+            summaryText.textContent = value || sourceBadge.name;
+            icon.alt = value || sourceBadge.name;
+        }
+        if (isUploaded) chrome.storage.local.set({ customBadges: uploadedBadges });
+        else chrome.storage.local.set({ badgeEdits });
+        saveSettings();
+    };
+    const effectiveVal = key => view[key] ?? '';
+
+    const nameInput = createEditorInput(effectiveVal('name'), strings.badgeName);
+    nameInput.maxLength = 64;
+    nameInput.addEventListener('input', () => persist('name', nameInput.value));
+    fields.appendChild(createField(strings.badgeName, nameInput));
+
+    const titleInput = createEditorInput(view.tooltipTitle ?? view.name ?? badge.name, strings.tooltipTitle);
+    titleInput.addEventListener('input', () => persist('tooltipTitle', titleInput.value));
+    fields.appendChild(createField(strings.tooltipTitle, titleInput));
+
+    const titleStyleLabel = document.createElement('label');
+    titleStyleLabel.className = 'badge-edit-style-toggle';
+    const titleStyleSwitch = document.createElement('span'); titleStyleSwitch.className = 'switch';
+    const titleStyleInput = document.createElement('input'); titleStyleInput.type = 'checkbox';
+    titleStyleInput.checked = ['nitro', 'italic'].includes(String(view.tooltipTitleStyle ?? view.tooltip?.titleStyle ?? '').toLowerCase());
+    const titleStyleSlider = document.createElement('span'); titleStyleSlider.className = 'slider';
+    titleStyleSwitch.append(titleStyleInput, titleStyleSlider);
+    const titleStyleText = document.createElement('span'); titleStyleText.textContent = strings.italicTitle;
+    titleStyleLabel.append(titleStyleSwitch, titleStyleText);
+    fields.appendChild(titleStyleLabel);
+    titleStyleInput.addEventListener('change', () => persist('tooltipTitleStyle', titleStyleInput.checked ? 'nitro' : ''));
+
+    const eyebrowInput = createEditorInput(effectiveVal('tooltipEyebrow'), strings.tooltipEyebrow);
+    eyebrowInput.addEventListener('input', () => persist('tooltipEyebrow', eyebrowInput.value));
+    fields.appendChild(createField(strings.tooltipEyebrow, eyebrowInput));
+
+    const descriptionInput = document.createElement('textarea');
+    descriptionInput.value = effectiveVal('description'); descriptionInput.placeholder = strings.tooltipDescription;
+    descriptionInput.addEventListener('input', () => persist('description', descriptionInput.value));
+    fields.appendChild(createField(strings.tooltipDescription, descriptionInput));
+
+    const graphicRow = document.createElement('div'); graphicRow.className = 'tooltip-image-row';
+    const graphicPreview = document.createElement('img'); graphicPreview.className = 'tooltip-image-preview';
+    graphicPreview.src = view.tooltipGraphicData || view.tooltipGraphic || badge.imageData || getBadgeImageUrl(badge.hash);
+    graphicPreview.alt = '';
+    const graphicInput = createEditorInput(view.tooltipGraphic || '', 'https://example.com/image.png', 'url');
+    graphicInput.addEventListener('input', () => { persist('tooltipGraphic', graphicInput.value); if (graphicInput.value.trim()) persist('tooltipGraphicData', ''); graphicPreview.src = graphicInput.value || badge.imageData || getBadgeImageUrl(badge.hash); });
+    const graphicInputLabel = createField(strings.tooltipGraphic, graphicInput);
+    graphicInputLabel.style.flex = '1'; graphicRow.append(graphicPreview, graphicInputLabel);
+    fields.appendChild(graphicRow);
+
+    const graphicFile = document.createElement('input'); graphicFile.type = 'file'; graphicFile.accept = 'image/png,image/jpeg,image/webp,image/gif'; graphicFile.className = 'tooltip-graphic-file';
+    const graphicFileLabel = document.createElement('label'); graphicFileLabel.className = 'upload-button';
+    graphicFileLabel.textContent = strings.uploadTooltipGraphic; graphicFileLabel.appendChild(graphicFile);
+    graphicFile.addEventListener('change', async () => {
+        const file = graphicFile.files?.[0]; graphicFile.value = ''; if (!file) return;
+        try { const data = await compressBadgeImage(file, 256); persist('tooltipGraphic', ''); graphicInput.value = ''; persist('tooltipGraphicData', data); graphicPreview.src = data; }
+        catch (_) { alert(strings.uploadError); }
+    });
+    fields.appendChild(graphicFileLabel);
+
+    const hrefInput = createEditorInput(view.href ?? '', 'https://example.com', 'url');
+    hrefInput.addEventListener('input', () => persist('href', hrefInput.value));
+    fields.appendChild(createField(strings.badgeClickUrl, hrefInput));
+
+    if (isUploaded) {
+        const actions = document.createElement('div'); actions.className = 'badge-editor-actions';
+        const saved = document.createElement('span'); saved.className = 'badge-editor-save'; saved.textContent = strings.saved;
+        const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = strings.remove;
+        remove.addEventListener('click', () => {
+            uploadedBadges = uploadedBadges.filter(item => item.hash !== badge.hash);
+            popupEnabledHashes = popupEnabledHashes.filter(hash => hash !== badge.hash);
+            popupBadgeOrder = popupBadgeOrder.filter(hash => hash !== badge.hash);
+            renderUploadedBadges(document.getElementById('uploadedBadgeList'), popupEnabledHashes);
+            updateUploadedCount(); renderEnabledBadgeOrder(document.getElementById('enabledBadgeOrder'), popupEnabledHashes, popupBadgeOrder); saveSettings();
+        });
+        actions.append(saved, remove); fields.appendChild(actions);
+    }
+    details.appendChild(fields);
+
+    checkbox.addEventListener('change', () => {
+        checkbox.setAttribute('aria-label', checkbox.checked ? strings.enabled : strings.disabled);
+        toggleText.textContent = checkbox.checked ? strings.enabled : strings.disabled;
+        const selected = [...document.querySelectorAll('#badgeList input[type="checkbox"], #uploadedBadgeList input[type="checkbox"]')].filter(input => input.checked).map(input => input.value);
+        popupEnabledHashes = selected;
+        renderEnabledBadgeOrder(document.getElementById('enabledBadgeOrder'), selected, getCurrentBadgeOrder(document.getElementById('enabledBadgeOrder'), [...badgeDetails, ...uploadedBadges].map(item => item.hash)));
+        saveSettings();
+    });
+    return card;
+}
+
+function renderUploadedBadges(container, enabledHashes = []) {
+    if (!container) return;
+    container.replaceChildren();
+    uploadedBadges.forEach(badge => container.appendChild(createBadgeEditorCard(badge, true, enabledHashes)));
+    updateUploadedCount();
+}
+
+function saveSettings() {
+    const inputs = document.querySelectorAll('#badgeList input[type="checkbox"], #uploadedBadgeList input[type="checkbox"]');
+    const selectedHashes = [...inputs].filter(input => input.checked).map(input => input.value);
+    const enabledOrder = [...document.querySelectorAll('#enabledBadgeOrder .order-badge')].map(item => item.dataset.hash);
+    const badgeOrder = [...badgeDetails, ...uploadedBadges].map(badge => badge.hash);
+    popupEnabledHashes = selectedHashes;
+    popupBadgeOrder = badgeOrder;
+    chrome.storage.local.set({ enabledHashes: selectedHashes, badgeOrder, activeBadgeOrder: enabledOrder, customBadges: uploadedBadges, badgeEdits });
 }
