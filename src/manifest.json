@@ -1,10 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Discord Profile Customize Tool",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "author": "SeihyouMirai",
   "description": "Discordのプロフィールをカスタマイズする拡張機能。",
-  "permissions": ["storage", "scripting"],
+  "permissions": [
+    "storage",
+    "scripting"
+  ],
   "host_permissions": [
     "https://discord.com/*",
     "https://*.discord.com/*"
@@ -26,7 +29,9 @@
         "https://canary.discord.com/*",
         "https://ptb.discord.com/*"
       ],
-      "js": ["staff-mode-bridge.js"],
+      "js": [
+        "staff-mode-bridge.js"
+      ],
       "run_at": "document_start"
     },
     {
@@ -36,7 +41,9 @@
         "https://canary.discord.com/*",
         "https://ptb.discord.com/*"
       ],
-      "js": ["staff-mode.js"],
+      "js": [
+        "staff-mode.js"
+      ],
       "run_at": "document_start",
       "world": "MAIN"
     },
@@ -47,7 +54,9 @@
         "https://canary.discord.com/*",
         "https://ptb.discord.com/*"
       ],
-      "js": ["server-tag-bridge.js"],
+      "js": [
+        "server-tag-bridge.js"
+      ],
       "run_at": "document_start"
     },
     {
@@ -57,7 +66,9 @@
         "https://canary.discord.com/*",
         "https://ptb.discord.com/*"
       ],
-      "js": ["profile-customization.js"],
+      "js": [
+        "profile-customization.js"
+      ],
       "run_at": "document_start"
     },
     {
@@ -67,7 +78,9 @@
         "https://canary.discord.com/*",
         "https://ptb.discord.com/*"
       ],
-      "js": ["bridge.js"],
+      "js": [
+        "bridge.js"
+      ],
       "run_at": "document_end"
     },
     {
@@ -77,7 +90,9 @@
         "https://canary.discord.com/*",
         "https://ptb.discord.com/*"
       ],
-      "js": ["content.js"],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_end",
       "world": "MAIN"
     }
