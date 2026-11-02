@@ -6,7 +6,7 @@
     return;
   }
   window.__DPC_CONSOLE_STARTED__ = true;
-  const STORAGE_KEY = 'discord-profile-customize-console-v1';
+  const STORAGE_KEY = 'discord-profile-customize-console-v1-0-9';
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || localStorage.getItem('discord-profile-customize-console-v1-0-9') || '{}') || {}; } catch (_) {}
   let legacyBadgeLinksMigrated = false;
