@@ -6,9 +6,35 @@
     return;
   }
   window.__DPC_CONSOLE_STARTED__ = true;
-  const STORAGE_KEY = 'discord-profile-customize-console-v1-0-8';
+  const STORAGE_KEY = 'discord-profile-customize-console-v1';
   let saved = {};
-  try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') || {}; } catch (_) {}
+  try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || localStorage.getItem('discord-profile-customize-console-v1-0-9') || '{}') || {}; } catch (_) {}
+  let legacyBadgeLinksMigrated = false;
+  if (Array.isArray(saved.customBadges)) {
+    saved.customBadges.forEach(badge => {
+      if (!badge || typeof badge !== 'object') return;
+      if (!Object.prototype.hasOwnProperty.call(badge, 'href') && typeof badge.tooltipHref === 'string') {
+        badge.href = badge.tooltipHref;
+        legacyBadgeLinksMigrated = true;
+      }
+      if ('tooltipHref' in badge) { delete badge.tooltipHref; legacyBadgeLinksMigrated = true; }
+      if ('tooltipLinkText' in badge) { delete badge.tooltipLinkText; legacyBadgeLinksMigrated = true; }
+    });
+  }
+  if (saved.badgeEdits && typeof saved.badgeEdits === 'object') {
+    Object.values(saved.badgeEdits).forEach(edit => {
+      if (!edit || typeof edit !== 'object') return;
+      if (!Object.prototype.hasOwnProperty.call(edit, 'href') && typeof edit.tooltipHref === 'string') {
+        edit.href = edit.tooltipHref;
+        legacyBadgeLinksMigrated = true;
+      }
+      if ('tooltipHref' in edit) { delete edit.tooltipHref; legacyBadgeLinksMigrated = true; }
+      if ('tooltipLinkText' in edit) { delete edit.tooltipLinkText; legacyBadgeLinksMigrated = true; }
+    });
+  }
+  if (legacyBadgeLinksMigrated) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)); } catch (_) {}
+  }
   window.__DPC_CONSOLE_STATE = saved;
 
 (function() {
@@ -209,6 +235,9 @@
     ];
 
     const __dpcInitial = window.__DPC_CONSOLE_STATE || {};
+    let customBadgeDetails = Array.isArray(__dpcInitial.customBadges) ? __dpcInitial.customBadges : [];
+    let customBadgeEdits = __dpcInitial.badgeEdits && typeof __dpcInitial.badgeEdits === 'object' ? __dpcInitial.badgeEdits : {};
+    const getAllBadges = () => [...badgeDetails.map(badge => ({ ...badge, ...(customBadgeEdits[badge.hash] || {}) })), ...customBadgeDetails];
     let enabledHashes = Array.isArray(__dpcInitial.enabledHashes)
         ? __dpcInitial.enabledHashes
         : badgeDetails.filter(badge => defaultBadgeNames.has(badge.name)).map(badge => badge.hash);
@@ -228,11 +257,24 @@
     const originalOwnedBadgeContents = new WeakMap();
 
     function injectBadges() {
+        if (overrideEnabled && enabledHashes.length) {
+            document.querySelectorAll('[class*="usernameAndPronounsRow"]').forEach(row => {
+                const profileSurface = row.closest('[class*="user-profile-popout"], [class*="user-profile-modal-v2"]');
+                if (!profileSurface || row.querySelector('[aria-label="User Badges"], [aria-label="ユーザーバッジ"], [data-dpc-created-badge-container]')) return;
+                const created = document.createElement('div');
+                created.className = 'container__8061a managed__8061a';
+                created.setAttribute('role', 'group');
+                created.setAttribute('aria-label', 'User Badges');
+                created.setAttribute('data-dpc-created-badge-container', 'true');
+                row.appendChild(created);
+            });
+        }
         const badgeContainers = document.querySelectorAll('[aria-label="User Badges"]:not(.badgeGrid_f18413):not([data-all-badges]), [aria-label="ユーザーバッジ"]:not(.badgeGrid_f18413):not([data-all-badges])');
         const badgeGrids = document.querySelectorAll('.badgeGrid_f18413[role="group"][aria-label="ユーザーバッジ"]:not([data-extension-badge-grid]), .badgeGrid_f18413[role="group"][aria-label="User Badges"]:not([data-extension-badge-grid])');
         const ownedBadgeGrids = document.querySelectorAll('.badgeGrid__6db38[role="tablist"][data-list-id="badge-directory-owned"]:not([data-extension-owned-badges])');
         if (!overrideEnabled) {
             document.querySelectorAll('[data-all-badges]').forEach(container => {
+                if (container.hasAttribute('data-dpc-created-badge-container')) { container.remove(); return; }
                 const original = originalBadgeContents.get(container);
                 if (original) {
                     container.replaceChildren(...original.childNodes);
@@ -257,7 +299,7 @@
             });
             return;
         }
-        const orderedBadges = [...badgeDetails].sort((a, b) => {
+        const orderedBadges = getAllBadges().sort((a, b) => {
             let indexA = activeBadgeOrder.indexOf(a.hash);
             let indexB = activeBadgeOrder.indexOf(b.hash);
             if (indexA === -1) indexA = badgeOrder.indexOf(a.hash);
@@ -296,15 +338,16 @@
                 anchor.setAttribute('aria-describedby', descriptionId);
                 anchor.tabIndex = 0;
                 attachBadgeTooltip(anchor, badge, accessibility);
-                if (badge.href) {
-                    anchor.href = badge.href;
-                    anchor.setAttribute('rel', 'noreferrer noopener');
+                const badgeClickHref = getBadgeClickHref(badge);
+                if (badgeClickHref) {
+                    anchor.href = badgeClickHref;
+                    anchor.setAttribute('rel', 'noopener noreferrer');
                     anchor.setAttribute('target', '_blank');
                 }
                 anchor.setAttribute('role', 'link');
 
                 const img = document.createElement('img');
-                img.src = getBadgeImageUrl(badge.hash);
+                img.src = getBadgeImageUrl(badge.imageData || badge.hash);
                 img.alt = ' ';
                 img.setAttribute('aria-hidden', 'true');
                 img.className = 'badge__8061a';
@@ -377,19 +420,28 @@
 
     function getBadgeAccessibility(badge) {
         const tooltip = badge.tooltip || {};
-        const title = badge.tooltipTitle ?? tooltip.title ?? badge.name;
+        const title = badge.tooltipTitle || tooltip.title || badge.name;
         const body = badge.description ?? tooltip.description ?? '';
-        const graphicValue = badge.tooltipGraphic ?? tooltip.graphic ?? badge.hash;
+        const graphicValue = badge.tooltipGraphicData || badge.tooltipGraphic || tooltip.graphic || badge.imageData || badge.hash;
 
         return {
-            ariaLabel: badge.ariaLabel ?? tooltip.ariaLabel ?? `${badge.name}バッジを取得しました`,
+            ariaLabel: badge.ariaLabel ?? tooltip.ariaLabel ?? `${badge.name} badge`,
             description: badge.ariaDescription ?? tooltip.ariaDescription ?? (body ? `${title}. ${body}` : `${title}.`),
             eyebrow: badge.tooltipEyebrow ?? tooltip.eyebrow ?? '',
             title,
             titleStyle: badge.tooltipTitleStyle ?? tooltip.titleStyle ?? '',
             body,
-            graphic: getBadgeImageUrl(graphicValue)
+            graphic: getBadgeImageUrl(graphicValue),
         };
+    }
+
+    function getBadgeClickHref(badge) {
+        const value = typeof badge.href === 'string' ? badge.href.trim() : '';
+        if (!value) return '';
+        try {
+            const parsed = new URL(value, location.href);
+            return parsed.protocol === 'https:' || parsed.protocol === 'http:' ? parsed.href : '';
+        } catch (_) { return ''; }
     }
 
     let customBadgeTooltipSequence = 0;
@@ -485,6 +537,8 @@
             tooltipLayer.setAttribute('data-popover-layer', 'true');
             tooltipLayer.tabIndex = -1;
             tooltipLayer.setAttribute('data-floating-ui-focusable', '');
+            tooltipLayer.addEventListener('mouseenter', () => { if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; } });
+            tooltipLayer.addEventListener('mouseleave', scheduleHide);
             Object.assign(tooltipLayer.style, {
                 position: 'fixed',
                 left: '0px',
@@ -563,7 +617,6 @@
                 body.textContent = accessibility.body;
                 titleGroup.appendChild(body);
             }
-
             content.append(graphic, titleGroup);
             tooltipContent.appendChild(content);
             tooltip.append(caret, tooltipContent);
@@ -607,7 +660,7 @@
         img.setAttribute('aria-hidden', 'true');
         img.draggable = false;
         img.className = 'badgeSlotIcon__6db38';
-        img.src = getBadgeImageUrl(badge.hash);
+        img.src = getBadgeImageUrl(badge.imageData || badge.hash);
         tab.appendChild(img);
         return tab;
     }
@@ -634,7 +687,7 @@
         img.setAttribute('aria-hidden', 'true');
         img.draggable = false;
         img.className = 'badgeTileIcon_f18413';
-        img.src = getBadgeImageUrl(badge.hash);
+        img.src = getBadgeImageUrl(badge.imageData || badge.hash);
         tile.appendChild(img);
         tileContainer.appendChild(tile);
 
@@ -660,13 +713,17 @@
     }
 
     function getBadgeImageUrl(hashOrUrl) {
-        if (/^data:image\/(?:svg\+xml|png|webp);(charset=utf-8;)?base64,/i.test(hashOrUrl)) return hashOrUrl;
+        if (/^data:image\//i.test(hashOrUrl)) return hashOrUrl;
         if (/^https?:\/\//i.test(hashOrUrl)) return hashOrUrl;
         return badgeBaseUrl + hashOrUrl + '.png';
     }
 
     window.addEventListener('message', event => {
         if (event.data && event.data.type === 'FROM_BADGE_EXTENSION_BRIDGE') {
+            if (event.data.badgeEdits && typeof event.data.badgeEdits === 'object') customBadgeEdits = event.data.badgeEdits;
+            if (Array.isArray(event.data.customBadges)) {
+                customBadgeDetails = event.data.customBadges.filter(badge => badge && typeof badge.hash === 'string' && typeof badge.imageData === 'string' && /^data:image\//i.test(badge.imageData));
+            }
             if (Array.isArray(event.data.enabledHashes)) enabledHashes = event.data.enabledHashes;
             if (Array.isArray(event.data.badgeOrder) && event.data.badgeOrder.length) badgeOrder = event.data.badgeOrder;
             if (Array.isArray(event.data.activeBadgeOrder)) activeBadgeOrder = event.data.activeBadgeOrder;
@@ -890,9 +947,12 @@
 
     const STORAGE_KEY = 'discord-profile-customize-console-v1';
     const badgeDetails = window.__DPC_BADGE_DETAILS || [];
+    let uploadedBadges = [];
     const defaults = {
         enabledHashes: [...(window.__DPC_DEFAULT_BADGE_HASHES || [])],
-        badgeOrder: badgeDetails.map(b => b.hash),
+        customBadges: [],
+        badgeEdits: {},
+        badgeOrder: [...badgeDetails, ...uploadedBadges].map(b => b.hash),
         activeBadgeOrder: [],
         overrideEnabled: true,
         badgeOmissionEnabled: true,
@@ -912,7 +972,7 @@
 
     function readSaved() {
         try {
-            const raw = localStorage.getItem(STORAGE_KEY);
+            const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('discord-profile-customize-console-v1-0-8');
             return raw ? JSON.parse(raw) : {};
         } catch (error) {
             return {};
@@ -921,13 +981,18 @@
 
     const storedState = readSaved();
     const state = { ...defaults, ...storedState };
+    uploadedBadges = Array.isArray(state.customBadges) ? state.customBadges : [];
     if (typeof storedState.staffModeEnabled !== 'boolean') {
         state.staffModeEnabled = typeof storedState.staffPreviewEnabled === 'boolean' ? storedState.staffPreviewEnabled : true;
     }
     delete state.staffPreviewEnabled;
     if (!Array.isArray(state.enabledHashes)) state.enabledHashes = [...defaults.enabledHashes];
+    if (!Array.isArray(state.customBadges)) state.customBadges = [];
+    if (!state.badgeEdits || typeof state.badgeEdits !== 'object') state.badgeEdits = {};
     if (!Array.isArray(state.badgeOrder) || !state.badgeOrder.length) state.badgeOrder = [...defaults.badgeOrder];
     if (!Array.isArray(state.activeBadgeOrder)) state.activeBadgeOrder = [];
+    const existingBadgeOrder = new Set(state.badgeOrder);
+    uploadedBadges.forEach(badge => { if (!existingBadgeOrder.has(badge.hash)) state.badgeOrder.push(badge.hash); });
     window.__DPC_CONSOLE_STATE = state;
 
     function badgeImageUrl(hashOrUrl) {
@@ -941,7 +1006,7 @@
     }
 
     function apply() {
-        const enabled = [...state.enabledHashes];
+        const enabled = [...new Set(state.enabledHashes)];
         const ordered = [...state.activeBadgeOrder.filter(hash => enabled.includes(hash))];
         enabled.forEach(hash => { if (!ordered.includes(hash)) ordered.push(hash); });
         state.activeBadgeOrder = ordered;
@@ -950,6 +1015,8 @@
             enabledHashes: enabled,
             badgeOrder: state.badgeOrder,
             activeBadgeOrder: ordered,
+            customBadges: uploadedBadges,
+            badgeEdits: state.badgeEdits || {},
             overrideEnabled: state.overrideEnabled,
             badgeOmissionEnabled: state.badgeOmissionEnabled
         }, '*');
@@ -981,16 +1048,16 @@
       #dpc-console-root{position:fixed;right:18px;bottom:18px;z-index:2147483647;font:13px/1.45 'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;color:#f2f3f5}
       #dpc-console-root *{box-sizing:border-box}
       #dpc-console-toggle{border:0;border-radius:999px;background:#5865f2;color:#fff;padding:11px 16px;font-weight:700;box-shadow:0 4px 18px #0008;cursor:pointer}
-      #dpc-console-panel{display:none;width:320px;max-width:calc(100vw - 28px);max-height:min(82vh,720px);margin-bottom:10px;background:#1e1f22;border:1px solid #393b43;border-radius:10px;box-shadow:0 12px 40px #000a;overflow:hidden}
+      #dpc-console-panel{display:none;width:min(640px,calc(100vw - 36px));max-width:calc(100vw - 36px);max-height:min(90vh,900px);margin-bottom:10px;background:#1e1f22;border:1px solid #393b43;border-radius:12px;box-shadow:0 12px 40px #000a;overflow:hidden}
       #dpc-console-panel.open{display:flex;flex-direction:column}
       #dpc-console-panel.staff-mode-enabled{border-color:#5865f2}
-      #dpc-console-inner{padding:16px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+      #dpc-console-inner{padding:18px;display:flex;flex-direction:column;min-width:0;min-height:0;flex:1;overflow:hidden}
       #dpc-console-head{margin:0 0 16px;padding:0 0 8px;border-bottom:1px solid #35363c;display:flex;align-items:center;justify-content:space-between;gap:8px}
       #dpc-console-head h1{margin:0;font-size:16px;font-weight:600;color:#fff}
       #dpc-console-close{border:0;background:transparent;color:#b5bac1;font-size:20px;line-height:1;cursor:pointer;padding:0 2px}
       #dpc-console-root #categorySelect{width:100%;margin:0 0 14px;padding:7px 8px;color:#f2f3f5;background:#2b2d31;border:1px solid #4e5058;border-radius:5px;font:inherit}
       #dpc-console-root .settings-panel[hidden]{display:none}
-      #dpc-console-root .settings-panel{max-height:min(62vh,570px);overflow-y:auto;padding-right:4px}
+      #dpc-console-root .settings-panel{max-height:min(78vh,780px);overflow-y:auto;padding-right:6px;min-width:0}
       #dpc-console-root .settings-panel::-webkit-scrollbar{width:6px}
       #dpc-console-root .settings-panel::-webkit-scrollbar-track{background:#1e1f22}
       #dpc-console-root .settings-panel::-webkit-scrollbar-thumb{background:#2b2d31;border-radius:4px}
@@ -1010,7 +1077,7 @@
       #dpc-console-root .order-badge:active{cursor:grabbing}
       #dpc-console-root .badge-section + .badge-section{margin-top:14px}
       #dpc-console-root .badge-section h2{margin:0 0 8px;padding:0 4px;color:#b5bac1;font-size:12px;font-weight:600}
-      #dpc-console-root #badgeList{max-height:360px;overflow-y:auto;padding-right:4px}
+      #dpc-console-root #badgeList{max-height:min(52vh,500px);overflow-y:auto;padding-right:5px}
       #dpc-console-root #badgeList::-webkit-scrollbar{width:6px}
       #dpc-console-root #badgeList::-webkit-scrollbar-track{background:#1e1f22}
       #dpc-console-root #badgeList::-webkit-scrollbar-thumb{background:#2b2d31;border-radius:4px}
@@ -1023,7 +1090,65 @@
       #dpc-console-root .server-tag-settings select,#dpc-console-root .server-tag-settings input,#dpc-console-root .profile-settings input,#dpc-console-root .profile-settings textarea{width:100%;box-sizing:border-box;padding:7px 8px;color:#f2f3f5;background:#2b2d31;border:1px solid #4e5058;border-radius:5px;font:inherit}
       #dpc-console-root .profile-settings{display:grid;gap:8px}
       #dpc-console-root .profile-settings textarea{min-height:90px;resize:vertical}
+      #dpc-console-root .custom-badge-manager{margin-top:14px;padding-top:12px;border-top:1px solid #35363c}
+      #dpc-console-root .custom-badge-manager label{display:block;margin:0 0 6px;color:#dbdee1;font-size:12px}
+      #dpc-console-root .custom-badge-manager .upload-button{display:inline-flex;margin:0;color:#fff}
+      #dpc-console-root .custom-badge-manager .upload-dropzone{display:flex;margin:11px 0 8px;color:#dbdee1}
+      #dpc-console-root .custom-badge-manager p{margin:6px 0 10px;color:#949ba4;font-size:11px}
+      #dpc-console-root .uploaded-badge-card{display:grid;grid-template-columns:34px 1fr;gap:7px;margin:0 0 8px;padding:9px;background:#232428;border:1px solid #35363c;border-radius:8px}
+      #dpc-console-root .uploaded-badge-card>img{width:28px;height:28px;object-fit:contain}
+      #dpc-console-root .uploaded-badge-fields{min-width:0;display:grid;gap:6px}
+      #dpc-console-root .uploaded-badge-fields input,#dpc-console-root .uploaded-badge-fields textarea{width:100%;min-width:0;box-sizing:border-box;padding:6px 7px;color:#f2f3f5;background:#2b2d31;border:1px solid #4e5058;border-radius:5px;font:inherit;font-size:12px}
+      #dpc-console-root .uploaded-badge-fields textarea{min-height:46px;resize:vertical}
+      #dpc-console-root .uploaded-badge-actions{display:flex;align-items:center;justify-content:space-between;gap:8px}
+      #dpc-console-root .uploaded-badge-actions button{border:0;border-radius:5px;padding:5px 8px;background:#da373c;color:white;cursor:pointer;font-size:11px}
+      #dpc-console-root .uploaded-badge-actions label{display:flex;align-items:center;gap:5px;font-size:11px}
+      #dpc-console-root .custom-badge-manager h2{font-size:13px;color:#f2f3f5;margin:0 0 5px}
+      #dpc-console-root .upload-dropzone{box-sizing:border-box;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;margin:11px 0 8px;padding:15px 12px;min-height:84px;border:1px dashed #5865f2;border-radius:10px;background:rgba(88,101,242,.08);color:#dbdee1;text-align:center;cursor:pointer;transition:background .15s,border-color .15s,transform .15s}
+      #dpc-console-root .upload-dropzone:hover,#dpc-console-root .upload-dropzone.is-dragover{border-color:#8792ff;background:rgba(88,101,242,.18)}
+      #dpc-console-root .upload-dropzone.is-dragover{transform:scale(.99)}
+      #dpc-console-root .upload-dropzone svg{width:23px;height:23px;color:#aeb6ff}
+      #dpc-console-root .upload-drop-title{font-size:12px;font-weight:650}
+      #dpc-console-root .upload-drop-hint{color:#949ba4;font-size:10px;line-height:1.4}
+      #dpc-console-root .upload-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:9px;margin:0 0 9px}
+      #dpc-console-root .upload-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 12px;border:0;border-radius:7px;background:#5865f2;color:#fff;font-size:12px;font-weight:650;cursor:pointer}
+      #dpc-console-root .upload-button:hover{background:#4752c4}
+      #dpc-console-root #customBadgeFiles,#dpc-console-root .tooltip-graphic-file{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+      #dpc-console-root .upload-count{color:#949ba4;font-size:11px}
+      #dpc-console-root .badge-edit-card{margin:0 0 8px;padding:9px;background:#232428;border:1px solid #35363c;border-radius:9px}
+      #dpc-console-root .badge-editor-top{display:flex;align-items:flex-start;gap:10px}
+      #dpc-console-root .badge-edit-details{min-width:0;flex:1}
+      #dpc-console-root .badge-edit-details>summary{display:flex;align-items:center;gap:9px;min-height:32px;list-style:none;cursor:pointer;user-select:none}
+      #dpc-console-root .badge-edit-details>summary::-webkit-details-marker{display:none}
+      #dpc-console-root .badge-edit-details>summary:after{content:'▾';color:#949ba4;margin-left:auto;font-size:12px;transition:transform .15s}
+      #dpc-console-root .badge-edit-details[open]>summary:after{transform:rotate(180deg)}
+      #dpc-console-root .badge-edit-details>summary img{width:28px;height:28px;flex:none;object-fit:contain;border-radius:5px}
+      #dpc-console-root .badge-edit-summary-name{min-width:0;overflow:hidden;color:#f2f3f5;font-size:12px;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
+      #dpc-console-root .badge-edit-summary-note{color:#949ba4;font-size:10px}
+      #dpc-console-root .badge-editor-toggle{flex:none;display:flex;align-items:center;gap:5px;padding-top:5px;color:#b5bac1;font-size:10px}
+      #dpc-console-root .toggle-state{min-width:30px;text-align:right;color:#949ba4;font-size:10px}
+      #dpc-console-root .badge-edit-fields{display:grid;gap:8px;padding:10px 0 1px 37px}
+      #dpc-console-root .badge-edit-fields>label{display:grid;gap:4px;color:#b5bac1;font-size:10px;margin:0}
+      #dpc-console-root .badge-edit-fields>label.upload-button{display:inline-flex;width:max-content;align-items:center}
+      #dpc-console-root .badge-edit-fields>label.badge-edit-style-toggle{display:flex;align-items:center;gap:9px;color:#b5bac1;font-size:11px;cursor:pointer}
+      #dpc-console-root .badge-edit-fields input[type=text],#dpc-console-root .badge-edit-fields input[type=url],#dpc-console-root .badge-edit-fields textarea{width:100%;min-width:0;box-sizing:border-box;padding:7px 8px;color:#f2f3f5;background:#2b2d31;border:1px solid #4e5058;border-radius:6px;font:inherit;font-size:11px}
+      #dpc-console-root .badge-edit-fields textarea{min-height:50px;resize:vertical}
+      #dpc-console-root .badge-edit-inline{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+      #dpc-console-root .tooltip-image-row{display:flex;align-items:center;gap:8px;min-width:0}
+      #dpc-console-root .tooltip-image-preview{width:34px;height:34px;flex:none;object-fit:contain;background:#1e1f22;border:1px solid #35363c;border-radius:6px}
+      #dpc-console-root .tooltip-image-row .upload-button{padding:7px 9px;font-size:10px;white-space:nowrap}
+      #dpc-console-root .badge-editor-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:4px}
+      #dpc-console-root .badge-editor-actions button{border:0;border-radius:6px;padding:7px 10px;background:#da373c;color:#fff;cursor:pointer;font-size:10px}
+      #dpc-console-root .badge-editor-save{color:#23a55a;font-size:10px}
+      #dpc-console-root .badge-edit-fields .field-hint{color:#949ba4;font-size:10px;line-height:1.4}
+
       #dpc-console-root .credit{margin:14px 0 0;padding-top:8px;border-top:1px solid #35363c;color:#949ba4;font-size:11px;text-align:center}
+      @media (max-width:680px){
+        #dpc-console-root{right:12px;bottom:12px}
+        #dpc-console-panel{width:calc(100vw - 24px);max-width:calc(100vw - 24px);max-height:92vh}
+        #dpc-console-inner{padding:13px}
+        #dpc-console-root .settings-panel{max-height:calc(92vh - 100px)}
+      }
     `;
     document.head.appendChild(style);
 
@@ -1041,7 +1166,7 @@
           </select>
           <section class="settings-panel" data-category="general">
             <div class="settings-row"><span data-i18n="language">言語</span><select id="languageSelect" aria-label="Language">
-              <option value="ja">日本語</option><option value="en">English</option><option value="ko">한국어</option><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option><option value="fr">Français</option><option value="de">Deutsch</option><option value="es">Español</option><option value="pt">Português</option><option value="ru">Русский</option>
+              <option value="ja">日本語</option><option value="en">English</option>
             </select></div>
             <div class="settings-row"><span data-i18n="staffMode">スタッフモード</span><label class="switch"><input id="staffModeToggle" type="checkbox"><span class="slider"></span></label></div>
           </section>
@@ -1050,6 +1175,18 @@
             <div class="settings-row"><span data-i18n="badgeOmission">バッジの省略</span><label class="switch"><input id="badgeOmissionToggle" type="checkbox"><span class="slider"></span></label></div>
             <div id="enabledBadgeOrder" aria-label="有効なバッジの表示順" title="ドラッグして表示順を変更"></div>
             <div id="badgeList"></div>
+            <section class="badge-section custom-badge-manager">
+              <h2 data-custom-i18n="uploadedBadges">アップロードしたバッジ</h2>
+              <p data-custom-i18n="localOnly">ここで追加したバッジは、このブラウザーのプロフィール表示にだけ反映されます。</p>
+              <label id="badgeUploadDropzone" class="upload-dropzone" for="customBadgeFiles" tabindex="0">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="upload-drop-title" data-custom-i18n="uploadImages">画像を追加（複数選択可）</span>
+                <span class="upload-drop-hint" data-custom-i18n="uploadHint">ここに画像をドラッグ＆ドロップ／クリックして選択 · PNG・JPG・WebP・GIF、5MB以下</span>
+              </label>
+              <input id="customBadgeFiles" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
+              <div class="upload-toolbar"><span id="uploadedBadgeCount" class="upload-count" aria-live="polite"></span></div>
+              <div id="uploadedBadgeList"></div>
+            </section>
           </section>
           <section class="settings-panel" data-category="serverTag" hidden>
             <div class="server-tag-settings">
@@ -1077,38 +1214,25 @@
     const panel = $('#dpc-console-panel');
 
     const uiTranslations = {
-      ja: { settings:'設定', language:'言語', staffMode:'スタッフモード', override:'バッジを上書き', serverTagToggle:'サーバータグを上書き', serverTagBadge:'サーバータグのバッジ', serverTagText:'サーバータグの文字', serverTagPlaceholder:'任意の文字', serverTagOff:'なし', standard:'通常バッジ', deleted:'削除済みバッジ', custom:'カスタムバッジ', order:'有効なバッジの表示順（ドラッグして変更）', credit:'Made by 清冰みらい' },
-      en: { settings:'Settings', language:'Language', staffMode:'Staff mode', override:'Override badges', serverTagToggle:'Override server tag', serverTagBadge:'Server tag badge', serverTagText:'Server tag text', serverTagPlaceholder:'Custom text', serverTagOff:'None', standard:'Standard badges', deleted:'Deleted badges', custom:'Custom badges', order:'Enabled badge order (drag to change)', credit:'Made by 清冰みらい' },
-      ko: { settings:'설정', language:'언어', staffMode:'스태프 모드', override:'배지 덮어쓰기', serverTagToggle:'서버 태그 사용', serverTagBadge:'서버 태그 배지', serverTagText:'서버 태그 문구', serverTagPlaceholder:'원하는 문구', serverTagOff:'없음', standard:'일반 배지', deleted:'삭제된 배지', custom:'사용자 지정 배지', order:'활성 배지 순서 (드래그하여 변경)', credit:'Made by 清冰みらい' },
-      'zh-CN': { settings:'设置', language:'语言', staffMode:'员工模式', override:'覆盖徽章', serverTagToggle:'启用服务器标签', serverTagBadge:'服务器标签徽章', serverTagText:'服务器标签文字', serverTagPlaceholder:'自定义文字', serverTagOff:'无', standard:'普通徽章', deleted:'已删除徽章', custom:'自定义徽章', order:'已启用徽章顺序（拖动以更改）', credit:'Made by 清冰みらい' },
-      'zh-TW': { settings:'設定', language:'語言', staffMode:'員工模式', override:'覆蓋徽章', serverTagToggle:'啟用伺服器標籤', serverTagBadge:'伺服器標籤徽章', serverTagText:'伺服器標籤文字', serverTagPlaceholder:'自訂文字', serverTagOff:'無', standard:'一般徽章', deleted:'已刪除徽章', custom:'自訂徽章', order:'已啟用徽章順序（拖曳以變更）', credit:'Made by 清冰みらい' },
-      fr: { settings:'Paramètres', language:'Langue', staffMode:'Mode staff', override:'Remplacer les badges', serverTagToggle:'Activer le tag serveur', serverTagBadge:'Badge du tag serveur', serverTagText:'Texte du tag serveur', serverTagPlaceholder:'Texte personnalisé', serverTagOff:'Aucun', standard:'Badges standard', deleted:'Badges supprimés', custom:'Badges personnalisés', order:'Ordre des badges activés (glisser pour modifier)', credit:'Made by 清冰みらい' },
-      de: { settings:'Einstellungen', language:'Sprache', staffMode:'Mitarbeitermodus', override:'Badges überschreiben', serverTagToggle:'Server-Tag aktivieren', serverTagBadge:'Server-Tag-Badge', serverTagText:'Server-Tag-Text', serverTagPlaceholder:'Eigener Text', serverTagOff:'Keiner', standard:'Standard-Badges', deleted:'Entfernte Badges', custom:'Benutzerdefinierte Badges', order:'Reihenfolge aktivierter Badges (zum Ändern ziehen)', credit:'Made by 清冰みらい' },
-      es: { settings:'Configuración', language:'Idioma', staffMode:'Modo de personal', override:'Sobrescribir insignias', serverTagToggle:'Activar etiqueta del servidor', serverTagBadge:'Insignia de etiqueta del servidor', serverTagText:'Texto de etiqueta', serverTagPlaceholder:'Texto personalizado', serverTagOff:'Ninguna', standard:'Insignias estándar', deleted:'Insignias eliminadas', custom:'Insignias personalizadas', order:'Orden de insignias activas (arrastra para cambiar)', credit:'Made by 清冰みらい' },
-      pt: { settings:'Configurações', language:'Idioma', staffMode:'Modo de equipe', override:'Substituir emblemas', serverTagToggle:'Ativar tag do servidor', serverTagBadge:'Emblema da tag do servidor', serverTagText:'Texto da tag', serverTagPlaceholder:'Texto personalizado', serverTagOff:'Nenhum', standard:'Emblemas padrão', deleted:'Emblemas removidos', custom:'Emblemas personalizados', order:'Ordem dos emblemas ativos (arraste para alterar)', credit:'Made by 清冰みらい' },
-      ru: { settings:'Настройки', language:'Язык', staffMode:'Режим персонала', override:'Заменять значки', serverTagToggle:'Включить тег сервера', serverTagBadge:'Значок тега сервера', serverTagText:'Текст тега сервера', serverTagPlaceholder:'Свой текст', serverTagOff:'Нет', standard:'Обычные значки', deleted:'Удалённые значки', custom:'Пользовательские значки', order:'Порядок активных значков (перетащите для изменения)', credit:'Made by 清冰みらい' }
+      ja: { settings:'設定', language:'言語', staffMode:'スタッフモード', override:'バッジを上書き', serverTagToggle:'サーバータグを上書き', serverTagBadge:'サーバータグのバッジ', serverTagText:'サーバータグの文字', serverTagPlaceholder:'任意の文字', serverTagOff:'なし', standard:'通常バッジ', deleted:'削除済みバッジ', custom:'カスタムバッジ', order:'有効なバッジの表示順（ドラッグして変更）', credit:'Made by 清冰みらい', uploadedBadges:'アップロードしたバッジ', uploadImages:'画像を追加（複数選択可）', uploadHint:'ここに画像をドラッグ＆ドロップ／クリックして選択 · PNG・JPG・WebP・GIF、5MB以下', localOnly:'ここで追加したバッジは、このブラウザーのプロフィール表示にだけ反映されます。', badgeName:'バッジ名', tooltipTitle:'ツールチップのタイトル', tooltipEyebrow:'ツールチップのサブタイトル', tooltipDescription:'ツールチップの説明', tooltipGraphic:'ツールチップ画像のURL', uploadTooltipGraphic:'画像をアップロード', badgeClickUrl:'バッジクリック時のリンクURL', italicTitle:'タイトルを斜体にする', editDetails:'詳細を編集', remove:'削除', enabled:'表示する', disabled:'非表示', saved:'保存済み', uploadError:'画像を読み込めませんでした。PNG、JPEG、WebP、GIF形式で5MB以下の画像を選択してください。', uploadLimit:'カスタム画像は最大20個まで追加できます。' },
+      en: { settings:'Settings', language:'Language', staffMode:'Staff mode', override:'Override badges', serverTagToggle:'Override server tag', serverTagBadge:'Server tag badge', serverTagText:'Server tag text', serverTagPlaceholder:'Custom text', serverTagOff:'None', standard:'Standard badges', deleted:'Deleted badges', custom:'Custom badges', order:'Enabled badge order (drag to change)', credit:'Made by SeihyouMirai', uploadedBadges:'Uploaded badges', uploadImages:'Add images (multiple selection supported)', uploadHint:'Drop images here or click to browse · PNG, JPG, WebP, GIF · up to 5 MB', localOnly:'Uploaded badges only affect profile previews in this browser.', badgeName:'Badge name', tooltipTitle:'Tooltip title', tooltipEyebrow:'Tooltip subtitle', tooltipDescription:'Tooltip description', tooltipGraphic:'Tooltip image URL', uploadTooltipGraphic:'Upload image', badgeClickUrl:'Badge click URL', italicTitle:'Italic title style', editDetails:'Edit details', remove:'Remove', enabled:'Show', disabled:'Hidden', saved:'Saved', uploadError:'Could not read the image. Choose a PNG, JPEG, WebP, or GIF image smaller than 5 MB.', uploadLimit:'You can add up to 20 custom images.' }
     };
     const extraTranslations = {
       ja: { categoryGeneral:'一般設定', categoryBadges:'バッジ', categoryServerTag:'サーバータグ', categoryProfile:'プロフィール', badgeOmission:'バッジの省略', pronounsEnabled:'代名詞を上書き', pronounsText:'代名詞', usernameEnabled:'ユーザー名を上書き', usernameText:'ユーザー名', bioEnabled:'自己紹介を上書き', bioText:'自己紹介', profilePlaceholder:'任意の文字' },
-      en: { categoryGeneral:'General', categoryBadges:'Badges', categoryServerTag:'Server tag', categoryProfile:'Profile', badgeOmission:'Collapse badges', pronounsEnabled:'Override pronouns', pronounsText:'Pronouns', usernameEnabled:'Override username', usernameText:'Username', bioEnabled:'Override bio', bioText:'Bio', profilePlaceholder:'Custom text' },
-      ko: { categoryGeneral:'일반 설정', categoryBadges:'배지', categoryServerTag:'서버 태그', categoryProfile:'프로필', badgeOmission:'배지 축약', pronounsEnabled:'대명사 덮어쓰기', pronounsText:'대명사', usernameEnabled:'사용자 이름 덮어쓰기', usernameText:'사용자 이름', bioEnabled:'소개 덮어쓰기', bioText:'소개', profilePlaceholder:'원하는 문구' },
-      'zh-CN': { categoryGeneral:'常规设置', categoryBadges:'徽章', categoryServerTag:'服务器标签', categoryProfile:'个人资料', badgeOmission:'折叠徽章', pronounsEnabled:'覆盖代词', pronounsText:'代词', usernameEnabled:'覆盖用户名', usernameText:'用户名', bioEnabled:'覆盖简介', bioText:'简介', profilePlaceholder:'自定义文字' },
-      'zh-TW': { categoryGeneral:'一般設定', categoryBadges:'徽章', categoryServerTag:'伺服器標籤', categoryProfile:'個人資料', badgeOmission:'收合徽章', pronounsEnabled:'覆蓋代名詞', pronounsText:'代名詞', usernameEnabled:'覆蓋使用者名稱', usernameText:'使用者名稱', bioEnabled:'覆蓋自我介紹', bioText:'自我介紹', profilePlaceholder:'自訂文字' },
-      fr: { categoryGeneral:'Général', categoryBadges:'Badges', categoryServerTag:'Tag serveur', categoryProfile:'Profil', badgeOmission:'Réduire les badges', pronounsEnabled:'Remplacer les pronoms', pronounsText:'Pronoms', usernameEnabled:'Remplacer le nom', usernameText:'Nom d’utilisateur', bioEnabled:'Remplacer la bio', bioText:'Bio', profilePlaceholder:'Texte personnalisé' },
-      de: { categoryGeneral:'Allgemein', categoryBadges:'Badges', categoryServerTag:'Server-Tag', categoryProfile:'Profil', badgeOmission:'Badges einklappen', pronounsEnabled:'Pronomen überschreiben', pronounsText:'Pronomen', usernameEnabled:'Nutzernamen überschreiben', usernameText:'Nutzername', bioEnabled:'Bio überschreiben', bioText:'Bio', profilePlaceholder:'Eigener Text' },
-      es: { categoryGeneral:'General', categoryBadges:'Insignias', categoryServerTag:'Etiqueta del servidor', categoryProfile:'Perfil', badgeOmission:'Contraer insignias', pronounsEnabled:'Sobrescribir pronombres', pronounsText:'Pronombres', usernameEnabled:'Sobrescribir nombre', usernameText:'Nombre de usuario', bioEnabled:'Sobrescribir biografía', bioText:'Biografía', profilePlaceholder:'Texto personalizado' },
-      pt: { categoryGeneral:'Geral', categoryBadges:'Emblemas', categoryServerTag:'Tag do servidor', categoryProfile:'Perfil', badgeOmission:'Recolher emblemas', pronounsEnabled:'Substituir pronomes', pronounsText:'Pronomes', usernameEnabled:'Substituir usuário', usernameText:'Nome de usuário', bioEnabled:'Substituir biografia', bioText:'Biografia', profilePlaceholder:'Texto personalizado' },
-      ru: { categoryGeneral:'Общие', categoryBadges:'Значки', categoryServerTag:'Тег сервера', categoryProfile:'Профиль', badgeOmission:'Свернуть значки', pronounsEnabled:'Заменить местоимения', pronounsText:'Местоимения', usernameEnabled:'Заменить имя', usernameText:'Имя пользователя', bioEnabled:'Заменить описание', bioText:'Описание', profilePlaceholder:'Свой текст' }
+      en: { categoryGeneral:'General', categoryBadges:'Badges', categoryServerTag:'Server tag', categoryProfile:'Profile', badgeOmission:'Collapse badges', pronounsEnabled:'Override pronouns', pronounsText:'Pronouns', usernameEnabled:'Override username', usernameText:'Username', bioEnabled:'Override bio', bioText:'Bio', profilePlaceholder:'Custom text' }
     };
     let currentLanguage = 'ja';
     function applyLanguage(language) {
-      currentLanguage = uiTranslations[language] ? language : 'ja';
+      currentLanguage = language === 'en' ? 'en' : 'ja';
       const strings = { ...uiTranslations[currentLanguage], ...extraTranslations[currentLanguage] };
       root.querySelectorAll('[data-i18n]').forEach(element => {
         element.textContent = strings[element.dataset.i18n] ?? element.textContent;
       });
       root.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
         element.placeholder = strings[element.dataset.i18nPlaceholder] ?? element.placeholder;
+      });
+      root.querySelectorAll('[data-custom-i18n]').forEach(element => {
+        element.textContent = strings[element.dataset.customI18n] ?? element.textContent;
       });
       const noTag = $('#serverTagBadgeSelect')?.options?.[0];
       if (noTag) noTag.textContent = strings.serverTagOff || 'None';
@@ -1117,6 +1241,7 @@
       root.querySelector('.badge-standard-title')?.replaceChildren(document.createTextNode(strings.standard || 'Standard badges'));
       root.querySelector('.badge-deleted-title')?.replaceChildren(document.createTextNode(strings.deleted || 'Deleted badges'));
       root.querySelector('.badge-custom-title')?.replaceChildren(document.createTextNode(strings.custom || 'Custom badges'));
+      if ($('#uploadedBadgeList')) renderUploadedBadges();
     }
 
     const deletedBadgeNames = [
@@ -1214,8 +1339,9 @@
       return `https://cdn.discordapp.com/badge-icons/${hashOrUrl}.png`;
     }
     function getOrderedBadges() {
-      const order = Array.isArray(state.badgeOrder) && state.badgeOrder.length ? state.badgeOrder : badgeDetails.map(item => item.hash);
-      return [...badgeDetails].sort((a, b) => {
+      const allBadges = [...badgeDetails, ...uploadedBadges];
+      const order = Array.isArray(state.badgeOrder) && state.badgeOrder.length ? state.badgeOrder : allBadges.map(item => item.hash);
+      return [...allBadges].sort((a, b) => {
         const ai = order.indexOf(a.hash), bi = order.indexOf(b.hash);
         return (ai < 0 ? 999999 : ai) - (bi < 0 ? 999999 : bi);
       });
@@ -1232,11 +1358,12 @@
       state.activeBadgeOrder = ordered;
       container.replaceChildren();
       ordered.forEach(hash => {
-        const badge = badgeDetails.find(item => item.hash === hash);
-        if (!badge) return;
+        const sourceBadge = [...badgeDetails, ...uploadedBadges].find(item => item.hash === hash);
+        if (!sourceBadge) return;
+        const badge = getEffectiveBadge(sourceBadge);
         const item = document.createElement('div');
         item.className = 'order-badge'; item.draggable = true; item.dataset.hash = hash; item.title = badge.name;
-        const img = document.createElement('img'); img.src = getBadgeImageUrl(hash); img.alt = badge.name;
+        const img = document.createElement('img'); img.src = getBadgeImageUrl(badge.imageData || hash); img.alt = badge.name;
         item.appendChild(img);
         item.addEventListener('dragstart', event => {
           item.classList.add('dragging');
@@ -1259,50 +1386,141 @@
         container.appendChild(item);
       });
     }
+    function getEffectiveBadge(badge) {
+      return badge.custom ? badge : { ...badge, ...(state.badgeEdits?.[badge.hash] || {}) };
+    }
+    function updateUploadedCount() {
+      const count = $('#uploadedBadgeCount');
+      if (count) count.textContent = `${uploadedBadges.length}/20`;
+    }
+    function createField(labelText, control) {
+      const label = document.createElement('label');
+      const caption = document.createElement('span'); caption.textContent = labelText;
+      label.append(caption, control); return label;
+    }
+    function createEditorInput(value, placeholder, type = 'text') {
+      const input = document.createElement('input'); input.type = type; input.value = value || ''; input.placeholder = placeholder || ''; return input;
+    }
+    function createBadgeEditorCard(sourceBadge, isUploaded) {
+      const badge = sourceBadge, view = getEffectiveBadge(sourceBadge), strings = uiTranslations[currentLanguage];
+      const card = document.createElement('article'); card.className = 'badge-edit-card'; card.dataset.hash = badge.hash;
+      const top = document.createElement('div'); top.className = 'badge-editor-top';
+      const details = document.createElement('details'); details.className = 'badge-edit-details';
+      const summary = document.createElement('summary');
+      const icon = document.createElement('img'); icon.src = getBadgeImageUrl(badge.imageData || badge.hash); icon.alt = view.name || badge.name;
+      const summaryText = document.createElement('span'); summaryText.className = 'badge-edit-summary-name'; summaryText.textContent = view.name || badge.name;
+      const summaryHint = document.createElement('span'); summaryHint.className = 'badge-edit-summary-note'; summaryHint.textContent = strings.editDetails;
+      summary.append(icon, summaryText, summaryHint); details.appendChild(summary);
+      const toggleLabel = document.createElement('label'); toggleLabel.className = 'badge-editor-toggle';
+      const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.value = badge.hash; checkbox.checked = state.enabledHashes.includes(badge.hash);
+      const switchWrap = document.createElement('span'); switchWrap.className = 'switch'; const slider = document.createElement('span'); slider.className = 'slider'; switchWrap.append(checkbox, slider); const toggleText = document.createElement('span'); toggleText.className = 'toggle-state'; toggleText.textContent = checkbox.checked ? strings.enabled : strings.disabled; toggleLabel.append(switchWrap, toggleText);
+      top.append(details, toggleLabel); card.appendChild(top);
+      const fields = document.createElement('div'); fields.className = 'badge-edit-fields';
+      const persist = (key, value) => {
+        if (isUploaded) { badge[key] = value; state.customBadges = uploadedBadges; }
+        else { state.badgeEdits ||= {}; state.badgeEdits[badge.hash] ||= {}; state.badgeEdits[badge.hash][key] = value; }
+        if (key === 'name') { summaryText.textContent = value || sourceBadge.name; icon.alt = value || sourceBadge.name; }
+        apply();
+      };
+      const nameInput = createEditorInput(view.name || badge.name, strings.badgeName); nameInput.maxLength = 64; nameInput.addEventListener('input', () => persist('name', nameInput.value)); fields.appendChild(createField(strings.badgeName, nameInput));
+      const titleInput = createEditorInput(view.tooltipTitle ?? view.name ?? badge.name, strings.tooltipTitle); titleInput.addEventListener('input', () => persist('tooltipTitle', titleInput.value)); fields.appendChild(createField(strings.tooltipTitle, titleInput));
+      const titleStyleLabel = document.createElement('label'); titleStyleLabel.className = 'badge-edit-style-toggle';
+      const titleStyleSwitch = document.createElement('span'); titleStyleSwitch.className = 'switch';
+      const titleStyleInput = document.createElement('input'); titleStyleInput.type = 'checkbox';
+      titleStyleInput.checked = ['nitro', 'italic'].includes(String(view.tooltipTitleStyle ?? view.tooltip?.titleStyle ?? '').toLowerCase());
+      const titleStyleSlider = document.createElement('span'); titleStyleSlider.className = 'slider'; titleStyleSwitch.append(titleStyleInput, titleStyleSlider);
+      const titleStyleText = document.createElement('span'); titleStyleText.textContent = strings.italicTitle;
+      titleStyleLabel.append(titleStyleSwitch, titleStyleText); fields.appendChild(titleStyleLabel);
+      titleStyleInput.addEventListener('change', () => persist('tooltipTitleStyle', titleStyleInput.checked ? 'nitro' : ''));
+      const eyebrowInput = createEditorInput(view.tooltipEyebrow, strings.tooltipEyebrow); eyebrowInput.addEventListener('input', () => persist('tooltipEyebrow', eyebrowInput.value)); fields.appendChild(createField(strings.tooltipEyebrow, eyebrowInput));
+      const descriptionInput = document.createElement('textarea'); descriptionInput.value = view.description || ''; descriptionInput.placeholder = strings.tooltipDescription; descriptionInput.addEventListener('input', () => persist('description', descriptionInput.value)); fields.appendChild(createField(strings.tooltipDescription, descriptionInput));
+      const graphicRow = document.createElement('div'); graphicRow.className = 'tooltip-image-row';
+      const graphicPreview = document.createElement('img'); graphicPreview.className = 'tooltip-image-preview'; graphicPreview.src = view.tooltipGraphicData || view.tooltipGraphic || badge.imageData || getBadgeImageUrl(badge.hash); graphicPreview.alt = '';
+      const graphicInput = createEditorInput(view.tooltipGraphic, 'https://example.com/image.png', 'url'); graphicInput.addEventListener('input', () => { persist('tooltipGraphic', graphicInput.value); if (graphicInput.value.trim()) persist('tooltipGraphicData', ''); graphicPreview.src = graphicInput.value || badge.imageData || getBadgeImageUrl(badge.hash); });
+      const graphicField = createField(strings.tooltipGraphic, graphicInput); graphicField.style.flex = '1'; graphicRow.append(graphicPreview, graphicField); fields.appendChild(graphicRow);
+      const graphicFile = document.createElement('input'); graphicFile.type = 'file'; graphicFile.accept = 'image/png,image/jpeg,image/webp,image/gif'; graphicFile.className = 'tooltip-graphic-file';
+      const graphicFileLabel = document.createElement('label'); graphicFileLabel.className = 'upload-button'; graphicFileLabel.textContent = strings.uploadTooltipGraphic; graphicFileLabel.appendChild(graphicFile);
+      graphicFile.addEventListener('change', async () => { const file = graphicFile.files?.[0]; graphicFile.value = ''; if (!file) return; try { const data = await compressBadgeImage(file, 256); persist('tooltipGraphic', ''); graphicInput.value = ''; persist('tooltipGraphicData', data); graphicPreview.src = data; } catch (_) { alert(strings.uploadError); } });
+      fields.appendChild(graphicFileLabel);
+      const hrefInput = createEditorInput(view.href ?? '', 'https://example.com', 'url');
+      hrefInput.addEventListener('input', () => persist('href', hrefInput.value));
+      fields.appendChild(createField(strings.badgeClickUrl, hrefInput));
+      if (isUploaded) {
+        const actions = document.createElement('div'); actions.className = 'badge-editor-actions';
+        const saved = document.createElement('span'); saved.className = 'badge-editor-save'; saved.textContent = strings.saved;
+        const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = strings.remove;
+        remove.addEventListener('click', () => { uploadedBadges = uploadedBadges.filter(item => item.hash !== badge.hash); state.customBadges = uploadedBadges; state.enabledHashes = state.enabledHashes.filter(hash => hash !== badge.hash); state.badgeOrder = state.badgeOrder.filter(hash => hash !== badge.hash); state.activeBadgeOrder = state.activeBadgeOrder.filter(hash => hash !== badge.hash); renderUploadedBadges(); renderEnabledBadgeOrder(); apply(); });
+        actions.append(saved, remove); fields.appendChild(actions);
+      }
+      details.appendChild(fields);
+      checkbox.addEventListener('change', () => { toggleText.textContent = checkbox.checked ? strings.enabled : strings.disabled; if (isUploaded) setEnabledBadgesFromList(); });
+      return card;
+    }
     function createBadgeSection(titleKey, badges, titleClass) {
-      const section = document.createElement('section');
-      section.className = 'badge-section';
-      const heading = document.createElement('h2');
-      heading.className = titleClass;
-      heading.textContent = ({ standard: '通常バッジ', deleted: '削除済みバッジ', custom: 'カスタムバッジ' })[titleKey];
-      section.appendChild(heading);
+      const section = document.createElement('section'); section.className = 'badge-section';
+      const heading = document.createElement('h2'); heading.className = titleClass;
+      heading.textContent = uiTranslations[currentLanguage][titleKey] || titleKey; section.appendChild(heading);
       const ordered = getOrderedBadges();
-      badges.filter(badge => ordered.includes(badge)).sort((a, b) => ordered.indexOf(a) - ordered.indexOf(b)).forEach(badge => {
-        const row = document.createElement('label');
-        row.className = 'badge-item';
-        const img = document.createElement('img'); img.src = getBadgeImageUrl(badge.hash); img.alt = badge.name;
-        const text = document.createElement('span'); text.className = 'badge-text'; text.textContent = badge.name;
-        const switchLabel = document.createElement('label'); switchLabel.className = 'switch';
-        const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.value = badge.hash; checkbox.checked = state.enabledHashes.includes(badge.hash);
-        const slider = document.createElement('span'); slider.className = 'slider';
-        switchLabel.append(checkbox, slider);
-        row.append(img, text, switchLabel);
-        section.appendChild(row);
-      });
+      badges.filter(badge => ordered.some(item => item.hash === badge.hash)).sort((a,b) => ordered.findIndex(x=>x.hash===a.hash)-ordered.findIndex(x=>x.hash===b.hash)).forEach(badge => section.appendChild(createBadgeEditorCard(badge, false)));
       return section;
     }
     function renderBadgeList() {
       const list = $('#badgeList');
-      list.replaceChildren(
-        createBadgeSection('standard', standardBadges, 'badge-standard-title'),
-        createBadgeSection('deleted', deletedBadges, 'badge-deleted-title'),
-        createBadgeSection('custom', customBadges, 'badge-custom-title')
-      );
-      applyLanguage(currentLanguage);
+      list.replaceChildren(createBadgeSection('standard', standardBadges, 'badge-standard-title'), createBadgeSection('deleted', deletedBadges, 'badge-deleted-title'), createBadgeSection('custom', customBadges, 'badge-custom-title'));
     }
+
+    async function compressBadgeImage(file, maxSize = 96) {
+      const allowed = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+      if (!allowed.includes(file.type) || file.size > 5 * 1024 * 1024) throw new Error('Unsupported image');
+      if (typeof createImageBitmap !== 'function') throw new Error('Image decoding is unavailable');
+      const bitmap = await createImageBitmap(file);
+      try {
+        const max = maxSize;
+        const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Canvas unavailable');
+        ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        let data = canvas.toDataURL('image/webp', 0.82);
+        if (!data.startsWith('data:image/webp')) data = canvas.toDataURL('image/png');
+        if (data.length > 50000) {
+          canvas.width = Math.max(1, Math.round(canvas.width * 0.67));
+          canvas.height = Math.max(1, Math.round(canvas.height * 0.67));
+          ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+          data = canvas.toDataURL('image/webp', 0.70);
+        }
+        if (data.length > 50000) {
+          canvas.width = Math.max(1, Math.round(canvas.width * 0.5));
+          canvas.height = Math.max(1, Math.round(canvas.height * 0.5));
+          ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+          data = canvas.toDataURL('image/webp', 0.55);
+        }
+        if (data.length > 70000) throw new Error('Compressed image is too large');
+        return data;
+      } finally { bitmap.close?.(); }
+    }
+
+    function renderUploadedBadges() {
+      const container = $('#uploadedBadgeList'); container.replaceChildren();
+      uploadedBadges.forEach(badge => container.appendChild(createBadgeEditorCard(badge, true)));
+      updateUploadedCount();
+    }
+
     function fillServerBadgeOptions() {
       const select = $('#serverTagBadgeSelect');
       select.replaceChildren();
       const none = document.createElement('option'); none.value = ''; none.textContent = 'なし'; select.appendChild(none);
-      const sorted = [...badgeDetails].sort((a, b) => {
+      const sorted = [...badgeDetails, ...uploadedBadges].sort((a, b) => {
         const aTag = /^Guild Tag (\d+)$/.exec(a.name);
         const bTag = /^Guild Tag (\d+)$/.exec(b.name);
         if (aTag && bTag) return Number(aTag[1]) - Number(bTag[1]);
         if (aTag) return -1;
         if (bTag) return 1;
-        return badgeDetails.indexOf(a) - badgeDetails.indexOf(b);
+        return [...badgeDetails, ...uploadedBadges].indexOf(a) - [...badgeDetails, ...uploadedBadges].indexOf(b);
       });
-      sorted.forEach(badge => { const option = document.createElement('option'); option.value = badge.hash; option.textContent = badge.name; select.appendChild(option); });
+      sorted.forEach(badge => { const option = document.createElement('option'); option.value = badge.hash; option.textContent = getEffectiveBadge(badge).name || badge.name; select.appendChild(option); });
     }
     function showCategory(category) {
       const valid = ['general', 'badges', 'serverTag', 'profile'].includes(category) ? category : 'general';
@@ -1315,7 +1533,7 @@
       panel.classList.toggle('staff-mode-enabled', state.staffModeEnabled === true);
     }
     function syncControls() {
-      $('#languageSelect').value = uiTranslations[state.language] ? state.language : 'ja';
+      $('#languageSelect').value = state.language === 'en' ? 'en' : 'ja';
       $('#staffModeToggle').checked = state.staffModeEnabled !== false;
       $('#overrideToggle').checked = state.overrideEnabled !== false;
       $('#badgeOmissionToggle').checked = state.badgeOmissionEnabled !== false;
@@ -1330,11 +1548,12 @@
       $('#bioText').value = state.bioText || '';
       updateStaffModeVisual();
       applyLanguage($('#languageSelect').value);
+      renderBadgeList(); renderUploadedBadges();
       showCategory(state.popupCategory || 'general');
     }
     function setEnabledBadgesFromList() {
       const currentOrder = getSelectedOrder();
-      state.enabledHashes = [...$('#badgeList').querySelectorAll('input[type="checkbox"]')].filter(input => input.checked).map(input => input.value);
+      state.enabledHashes = [...$('#badgeList').querySelectorAll('input[type="checkbox"]'), ...$('#uploadedBadgeList').querySelectorAll('input[type="checkbox"]')].filter(input => input.checked).map(input => input.value);
       state.activeBadgeOrder = currentOrder.filter(hash => state.enabledHashes.includes(hash));
       state.enabledHashes.forEach(hash => { if (!state.activeBadgeOrder.includes(hash)) state.activeBadgeOrder.push(hash); });
       renderEnabledBadgeOrder();
@@ -1347,6 +1566,7 @@
     $('#languageSelect').addEventListener('change', () => {
       state.language = $('#languageSelect').value;
       applyLanguage(state.language);
+      renderBadgeList(); renderUploadedBadges();
       persist();
     });
     $('#staffModeToggle').addEventListener('change', event => {
@@ -1369,9 +1589,36 @@
     $('#usernameText').addEventListener('input', event => { state.usernameText = event.target.value; apply(); });
     $('#bioEnabled').addEventListener('change', event => { state.bioEnabled = event.target.checked; apply(); });
     $('#bioText').addEventListener('input', event => { state.bioText = event.target.value; apply(); });
+    const addCustomBadgeFiles = async fileList => {
+      const files = [...(fileList || [])];
+      for (const file of files) {
+        if (uploadedBadges.length >= 20) { alert(uiTranslations[currentLanguage].uploadLimit); break; }
+        try {
+          const imageData = await compressBadgeImage(file);
+          const name = file.name.replace(/\.[^.]+$/, '') || 'Custom badge';
+          const badge = { hash: `custom-${crypto.randomUUID()}`, name, imageData, tooltipTitle: name, tooltipEyebrow: '', description: '', tooltipGraphic: '', tooltipGraphicData: '', href: '', custom: true };
+          uploadedBadges.push(badge);
+          state.enabledHashes.push(badge.hash);
+          state.badgeOrder.push(badge.hash);
+          state.activeBadgeOrder.push(badge.hash);
+        } catch (error) { alert(uiTranslations[currentLanguage].uploadError); }
+      }
+      state.customBadges = uploadedBadges;
+      renderUploadedBadges(); renderEnabledBadgeOrder(); apply();
+    };
+    $('#customBadgeFiles').addEventListener('change', async () => {
+      const files = [...($('#customBadgeFiles').files || [])];
+      $('#customBadgeFiles').value = '';
+      await addCustomBadgeFiles(files);
+    });
+    $('#badgeUploadDropzone').addEventListener('dragover', event => { event.preventDefault(); $('#badgeUploadDropzone').classList.add('is-dragover'); });
+    $('#badgeUploadDropzone').addEventListener('dragleave', event => { if (!$('#badgeUploadDropzone').contains(event.relatedTarget)) $('#badgeUploadDropzone').classList.remove('is-dragover'); });
+    $('#badgeUploadDropzone').addEventListener('drop', async event => { event.preventDefault(); $('#badgeUploadDropzone').classList.remove('is-dragover'); await addCustomBadgeFiles([...event.dataTransfer.files]); });
+    $('#badgeUploadDropzone').addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); $('#customBadgeFiles').click(); } });
 
     fillServerBadgeOptions();
     renderBadgeList();
+    renderUploadedBadges();
     renderEnabledBadgeOrder();
     syncControls();
     apply();
