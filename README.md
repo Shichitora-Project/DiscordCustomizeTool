@@ -6,8 +6,6 @@ You can also enable the staff feature.
 
 This extension only supports Japanese and English (en_US).
 
-To overwrite a field, it must already exist, and to overwrite a badge, you must have one or more badges.
-
 ---
 
 ## How to Use
