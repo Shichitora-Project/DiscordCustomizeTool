@@ -986,6 +986,55 @@
         state.staffModeEnabled = typeof storedState.staffPreviewEnabled === 'boolean' ? storedState.staffPreviewEnabled : true;
     }
     delete state.staffPreviewEnabled;
+
+    // Staff mode changes only the client-side environment values. It does not
+    // grant Discord permissions; the server remains responsible for access checks.
+    let staffEnvironmentSnapshot = null;
+    function applyStaffEnvironment() {
+        const env = window.GLOBAL_ENV;
+
+        if (state.staffModeEnabled === true) {
+            if (!env || typeof env !== 'object') {
+                console.warn('[DPC] window.GLOBAL_ENV is not available in this execution context.');
+                return;
+            }
+
+            if (!staffEnvironmentSnapshot || staffEnvironmentSnapshot.env !== env) {
+                staffEnvironmentSnapshot = {
+                    env,
+                    projectEnv: Object.getOwnPropertyDescriptor(env, 'PROJECT_ENV'),
+                    releaseChannel: Object.getOwnPropertyDescriptor(env, 'RELEASE_CHANNEL')
+                };
+            }
+
+            try {
+                env.PROJECT_ENV = 'staging';
+                env.RELEASE_CHANNEL = 'staging';
+                if (env.PROJECT_ENV !== 'staging' || env.RELEASE_CHANNEL !== 'staging') {
+                    console.warn('[DPC] GLOBAL_ENV is present but its staging values could not be confirmed.');
+                }
+            } catch (error) {
+                console.warn('[DPC] Could not set the client-side staging environment:', error);
+            }
+            return;
+        }
+
+        if (!staffEnvironmentSnapshot) return;
+        if (env === staffEnvironmentSnapshot.env) {
+            try {
+                const restoreProperty = (target, key, descriptor) => {
+                    if (descriptor) Object.defineProperty(target, key, descriptor);
+                    else delete target[key];
+                };
+                restoreProperty(env, 'PROJECT_ENV', staffEnvironmentSnapshot.projectEnv);
+                restoreProperty(env, 'RELEASE_CHANNEL', staffEnvironmentSnapshot.releaseChannel);
+            } catch (error) {
+                console.warn('[DPC] Could not restore the original client-side environment:', error);
+            }
+        }
+        staffEnvironmentSnapshot = null;
+    }
+
     if (!Array.isArray(state.enabledHashes)) state.enabledHashes = [...defaults.enabledHashes];
     if (!Array.isArray(state.customBadges)) state.customBadges = [];
     if (!state.badgeEdits || typeof state.badgeEdits !== 'object') state.badgeEdits = {};
@@ -1531,6 +1580,7 @@
     }
     function updateStaffModeVisual() {
       panel.classList.toggle('staff-mode-enabled', state.staffModeEnabled === true);
+      applyStaffEnvironment();
     }
     function syncControls() {
       $('#languageSelect').value = state.language === 'en' ? 'en' : 'ja';
