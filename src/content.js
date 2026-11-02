@@ -195,6 +195,23 @@
     { hash: 'data:image/svg+xml;charset=utf-8;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzQ4NV8xNDgpIj4KPHBhdGggZD0iTTE2IDEwVjEySDEwVjEwSDE2Wk0xMCAxMEg4VjhIMTBWMTBaTTIyIDEwSDIwVjhIMjJWMTBaTTggOEg2VjRIOFY4Wk0yMCA4SDE4VjZIMjBWOFpNMTggNkgxNlY0SDE4VjZaTTE2IDRIMTRWMkgxNlY0WiIgZmlsbD0iI0I3REJGNiIvPgo8cGF0aCBkPSJNMTggMTJIMTZWMTBIMTBWOEg4VjJIMTJWNEgxNFY2SDE2VjhIMThWMTJaTTI2IDE0SDI4VjE2SDI2VjE0WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTI2IDE2SDI4VjE4SDI0VjE0SDI2VjE2WiIgZmlsbD0iI0I3REJGNiIvPgo8cGF0aCBkPSJNOCAyMkg2VjIwSDhWMjJaTTEyIDIySDEwVjIwSDEyVjIyWk0yMCAyMkgxOFYyMEgxNlYxNEgxOFYxMkgyMFYyMlpNMTQgMjBIMTJWMThIMTRWMjBaTTggMThINlYxNkg4VjE4Wk0xNCAxNkgxMlYxOEgxMFYxNEgxNFYxNlpNOCAxNEg2VjEySDhWMTRaIiBmaWxsPSIjRkFFMzMwIi8+CjxwYXRoIGQ9Ik0xNCAyNkgxMFYyMkgxMlYyMEgxNFYyNlpNMTggMjJIMjJWMjRIMjBWMjZIMTZWMjBIMThWMjJaTTggMjRINlYyMkg4VjI0Wk04IDE2SDZWMThIOFYyMEg2VjIySDRWMTRIOFYxNlpNMTIgMjBIMTBWMThIMTJWMjBaTTE0IDE4SDEyVjE2SDE0VjE4WiIgZmlsbD0iI0U3OTQxOCIvPgo8cGF0aCBkPSJNMTAgMzJIOFYzMEgxMFYzMlpNMTYgMzJIMTRWMzBIMTZWMzJaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTI0IDEwSDI2VjZIMjhWMTBIMzBWMTJIMzJWMjJIMzBWMjRIMjRWMjhIMjJWMjZIMjBWMjhIMThWMzBIMTZWMjhIMTJWMzBIMTBWMjhIOFYyNkg2VjI0SDhWMTJINlY4SDhWMTBIMTBWMTJIMThWOEgyMFYxMEgyMlY4SDIwVjZIMjJWNEgyNFYxMFpNMTAgMjZIMTRWMTRIMTBWMjZaTTE4IDE0SDE2VjI2SDIwVjI0SDIyVjIySDIwVjEySDE4VjE0Wk0yNCAxOEgyOFYxNEgyNFYxOFoiIGZpbGw9ImJsYWNrIi8+CjxwYXRoIGQ9Ik0yMiAzMEgyMFYyOEgyMlYzMFpNNiAyNEg0VjIySDZWMjRaTTQgMjJIMlYxOEgwVjE2SDJWMTRINFYyMlpNNiAxNEg0VjEySDZWMTRaTTYgOEg0VjRINlY4Wk0xOCA4SDE2VjZIMThWOFpNMTYgNkgxNFY0SDE2VjZaTTIwIDZIMThWNEgyMFY2Wk0zMCA2SDI4VjRIMzBWNlpNOCA0SDZWMkg4VjRaTTE0IDRIMTJWMkgxNFY0Wk0xOCA0SDE2VjJIMThWNFpNMjYgNEgyNFYySDI2VjRaTTEyIDJIOFYwSDEyVjJaTTE2IDJIMTRWMEgxNlYyWiIgZmlsbD0iYmxhY2siLz4KPC9nPgo8ZGVmcz4KPGNsaXBQYXRoIGlkPSJjbGlwMF80ODVfMTQ4Ij4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSJ3aGl0ZSIvPgo8L2NsaXBQYXRoPgo8L2RlZnM+Cjwvc3ZnPgo=', name: 'Guild Tag 41' }
     ];
 
+    let customBadgeDetails = [];
+    let badgeEdits = {};
+    function migrateLegacyBadgeLinks() {
+        customBadgeDetails.forEach(badge => {
+            if (!badge || typeof badge !== 'object') return;
+            if (!Object.prototype.hasOwnProperty.call(badge, 'href') && typeof badge.tooltipHref === 'string') badge.href = badge.tooltipHref;
+            delete badge.tooltipHref;
+            delete badge.tooltipLinkText;
+        });
+        Object.values(badgeEdits).forEach(edit => {
+            if (!edit || typeof edit !== 'object') return;
+            if (!Object.prototype.hasOwnProperty.call(edit, 'href') && typeof edit.tooltipHref === 'string') edit.href = edit.tooltipHref;
+            delete edit.tooltipHref;
+            delete edit.tooltipLinkText;
+        });
+    }
+    const getAllBadges = () => [...badgeDetails.map(badge => ({ ...badge, ...(badgeEdits[badge.hash] || {}) })), ...customBadgeDetails];
     let enabledHashes = badgeDetails
         .filter(badge => defaultBadgeNames.has(badge.name))
         .map(badge => badge.hash);
@@ -207,11 +224,32 @@
     const originalOwnedBadgeContents = new WeakMap();
 
     function injectBadges() {
+        // Discord may omit the User Badges node entirely when the account owns no badges.
+        // Create a local display container in profile rows so custom badges can still render.
+        if (overrideEnabled && enabledHashes.length) {
+            document.querySelectorAll('[class*="usernameAndPronounsRow"]').forEach(row => {
+                const profileSurface = row.closest('[class*="user-profile-popout"], [class*="user-profile-modal-v2"]');
+                if (!profileSurface) return;
+                const existing = row.querySelector('[aria-label="User Badges"], [aria-label="ユーザーバッジ"]');
+                if (existing) return;
+                if (row.querySelector('[data-dpc-created-badge-container]')) return;
+                const created = document.createElement('div');
+                created.className = 'container__8061a managed__8061a';
+                created.setAttribute('role', 'group');
+                created.setAttribute('aria-label', 'User Badges');
+                created.setAttribute('data-dpc-created-badge-container', 'true');
+                row.appendChild(created);
+            });
+        }
         const badgeContainers = document.querySelectorAll('[aria-label="User Badges"]:not(.badgeGrid_f18413):not([data-all-badges]), [aria-label="ユーザーバッジ"]:not(.badgeGrid_f18413):not([data-all-badges])');
         const badgeGrids = document.querySelectorAll('.badgeGrid_f18413[role="group"][aria-label="ユーザーバッジ"]:not([data-extension-badge-grid]), .badgeGrid_f18413[role="group"][aria-label="User Badges"]:not([data-extension-badge-grid])');
         const ownedBadgeGrids = document.querySelectorAll('.badgeGrid__6db38[role="tablist"][data-list-id="badge-directory-owned"]:not([data-extension-owned-badges])');
         if (!overrideEnabled) {
             document.querySelectorAll('[data-all-badges]').forEach(container => {
+                if (container.hasAttribute('data-dpc-created-badge-container')) {
+                    container.remove();
+                    return;
+                }
                 const original = originalBadgeContents.get(container);
                 if (original) {
                     container.replaceChildren(...original.childNodes);
@@ -236,7 +274,7 @@
             });
             return;
         }
-        const orderedBadges = [...badgeDetails].sort((a, b) => {
+        const orderedBadges = getAllBadges().sort((a, b) => {
             let indexA = activeBadgeOrder.indexOf(a.hash);
             let indexB = activeBadgeOrder.indexOf(b.hash);
             if (indexA === -1) indexA = badgeOrder.indexOf(a.hash);
@@ -275,15 +313,16 @@
                 anchor.setAttribute('aria-describedby', descriptionId);
                 anchor.tabIndex = 0;
                 attachBadgeTooltip(anchor, badge, accessibility);
-                if (badge.href) {
-                    anchor.href = badge.href;
-                    anchor.setAttribute('rel', 'noreferrer noopener');
+                const badgeClickHref = getBadgeClickHref(badge);
+                if (badgeClickHref) {
+                    anchor.href = badgeClickHref;
+                    anchor.setAttribute('rel', 'noopener noreferrer');
                     anchor.setAttribute('target', '_blank');
                 }
                 anchor.setAttribute('role', 'link');
 
                 const img = document.createElement('img');
-                img.src = getBadgeImageUrl(badge.hash);
+                img.src = getBadgeImageUrl(badge.imageData || badge.hash);
                 img.alt = ' ';
                 img.setAttribute('aria-hidden', 'true');
                 img.className = 'badge__8061a';
@@ -356,19 +395,28 @@
 
     function getBadgeAccessibility(badge) {
         const tooltip = badge.tooltip || {};
-        const title = badge.tooltipTitle ?? tooltip.title ?? badge.name;
+        const title = badge.tooltipTitle || tooltip.title || badge.name;
         const body = badge.description ?? tooltip.description ?? '';
-        const graphicValue = badge.tooltipGraphic ?? tooltip.graphic ?? badge.hash;
+        const graphicValue = badge.tooltipGraphicData || badge.tooltipGraphic || tooltip.graphic || badge.imageData || badge.hash;
 
         return {
-            ariaLabel: badge.ariaLabel ?? tooltip.ariaLabel ?? `${badge.name}バッジを取得しました`,
+            ariaLabel: badge.ariaLabel ?? tooltip.ariaLabel ?? `${badge.name} badge`,
             description: badge.ariaDescription ?? tooltip.ariaDescription ?? (body ? `${title}. ${body}` : `${title}.`),
             eyebrow: badge.tooltipEyebrow ?? tooltip.eyebrow ?? '',
             title,
             titleStyle: badge.tooltipTitleStyle ?? tooltip.titleStyle ?? '',
             body,
-            graphic: getBadgeImageUrl(graphicValue)
+            graphic: getBadgeImageUrl(graphicValue),
         };
+    }
+
+    function getBadgeClickHref(badge) {
+        const value = typeof badge.href === 'string' ? badge.href.trim() : '';
+        if (!value) return '';
+        try {
+            const parsed = new URL(value, location.href);
+            return parsed.protocol === 'https:' || parsed.protocol === 'http:' ? parsed.href : '';
+        } catch (_) { return ''; }
     }
 
     let customBadgeTooltipSequence = 0;
@@ -464,6 +512,8 @@
             tooltipLayer.setAttribute('data-popover-layer', 'true');
             tooltipLayer.tabIndex = -1;
             tooltipLayer.setAttribute('data-floating-ui-focusable', '');
+            tooltipLayer.addEventListener('mouseenter', () => { if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; } });
+            tooltipLayer.addEventListener('mouseleave', scheduleHide);
             Object.assign(tooltipLayer.style, {
                 position: 'fixed',
                 left: '0px',
@@ -542,7 +592,6 @@
                 body.textContent = accessibility.body;
                 titleGroup.appendChild(body);
             }
-
             content.append(graphic, titleGroup);
             tooltipContent.appendChild(content);
             tooltip.append(caret, tooltipContent);
@@ -586,7 +635,7 @@
         img.setAttribute('aria-hidden', 'true');
         img.draggable = false;
         img.className = 'badgeSlotIcon__6db38';
-        img.src = getBadgeImageUrl(badge.hash);
+        img.src = getBadgeImageUrl(badge.imageData || badge.hash);
         tab.appendChild(img);
         return tab;
     }
@@ -613,7 +662,7 @@
         img.setAttribute('aria-hidden', 'true');
         img.draggable = false;
         img.className = 'badgeTileIcon_f18413';
-        img.src = getBadgeImageUrl(badge.hash);
+        img.src = getBadgeImageUrl(badge.imageData || badge.hash);
         tile.appendChild(img);
         tileContainer.appendChild(tile);
 
@@ -639,13 +688,18 @@
     }
 
     function getBadgeImageUrl(hashOrUrl) {
-        if (/^data:image\/(?:svg\+xml|png|webp);(charset=utf-8;)?base64,/i.test(hashOrUrl)) return hashOrUrl;
+        if (/^data:image\/[a-z0-9.+-]+;(?:charset=[^;,]+;)?base64,/i.test(hashOrUrl)) return hashOrUrl;
         if (/^https?:\/\//i.test(hashOrUrl)) return hashOrUrl;
         return badgeBaseUrl + hashOrUrl + '.png';
     }
 
     window.addEventListener('message', event => {
         if (event.data && event.data.type === 'FROM_BADGE_EXTENSION_BRIDGE') {
+            if (event.data.badgeEdits && typeof event.data.badgeEdits === 'object') badgeEdits = event.data.badgeEdits;
+            if (Array.isArray(event.data.customBadges)) {
+                customBadgeDetails = event.data.customBadges.filter(badge => badge && typeof badge.hash === 'string' && typeof badge.imageData === 'string' && /^data:image\/(?:webp|png|jpeg);base64,/i.test(badge.imageData));
+            }
+            migrateLegacyBadgeLinks();
             if (Array.isArray(event.data.enabledHashes)) enabledHashes = event.data.enabledHashes;
             if (Array.isArray(event.data.badgeOrder) && event.data.badgeOrder.length) badgeOrder = event.data.badgeOrder;
             if (Array.isArray(event.data.activeBadgeOrder)) activeBadgeOrder = event.data.activeBadgeOrder;
