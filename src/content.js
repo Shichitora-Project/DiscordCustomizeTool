@@ -475,9 +475,14 @@
     function attachBadgeTooltip(anchor, badge, accessibility) {
         let portalEntry = null;
         let tooltipLayer = null;
+        let showTimer = null;
         let hideTimer = null;
 
         const hide = () => {
+            if (showTimer) {
+                clearTimeout(showTimer);
+                showTimer = null;
+            }
             if (hideTimer) {
                 clearTimeout(hideTimer);
                 hideTimer = null;
@@ -501,6 +506,10 @@
         };
 
         const show = () => {
+            if (showTimer) {
+                clearTimeout(showTimer);
+                showTimer = null;
+            }
             if (hideTimer) {
                 clearTimeout(hideTimer);
                 hideTimer = null;
@@ -581,6 +590,7 @@
                 eyebrow.className = 'text-sm/medium_cf4812 eyebrow__45458';
                 eyebrow.setAttribute('data-text-variant', 'text-sm/medium');
                 eyebrow.style.color = 'var(--text-subtle)';
+                eyebrow.style.fontSize = '14px';
                 eyebrow.textContent = accessibility.eyebrow;
                 titleGroup.appendChild(eyebrow);
             }
@@ -600,6 +610,7 @@
                 body.className = 'text-sm/medium_cf4812 body__45458';
                 body.setAttribute('data-text-variant', 'text-sm/medium');
                 body.style.color = 'var(--text-subtle)';
+                body.style.fontSize = '14px';
                 body.textContent = accessibility.body;
                 titleGroup.appendChild(body);
             }
@@ -616,11 +627,28 @@
             window.addEventListener('resize', positionTooltip);
         };
 
+        const scheduleShow = () => {
+            if (hideTimer) {
+                clearTimeout(hideTimer);
+                hideTimer = null;
+            }
+            if (portalEntry) return;
+            if (showTimer) clearTimeout(showTimer);
+            showTimer = setTimeout(() => {
+                showTimer = null;
+                show();
+            }, 180);
+        };
+
         const scheduleHide = () => {
+            if (showTimer) {
+                clearTimeout(showTimer);
+                showTimer = null;
+            }
             hideTimer = setTimeout(hide, 70);
         };
 
-        anchor.addEventListener('mouseenter', show);
+        anchor.addEventListener('mouseenter', scheduleShow);
         anchor.addEventListener('mouseleave', scheduleHide);
         anchor.addEventListener('focus', show);
         anchor.addEventListener('blur', hide);
