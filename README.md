@@ -2,6 +2,8 @@
 
 An extension for customizing your Discord profile.
 
+Freely assign existing badges, add custom badges, overwrite profile information...
+
 You can also enable the staff feature.
 
 This extension only supports Japanese and English (en_US).
