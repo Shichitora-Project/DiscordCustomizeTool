@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Discord Profile Customize Tool",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "author": "SeihyouMirai",
   "description": "Discordのプロフィールをカスタマイズする拡張機能。",
   "permissions": [
