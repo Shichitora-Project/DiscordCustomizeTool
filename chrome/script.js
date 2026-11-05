@@ -930,7 +930,6 @@
             item.setAttribute('role', 'listitem');
             const icon = document.createElement('img'); icon.className = 'tierTimelineIcon__64bbc';
             icon.alt = ''; icon.setAttribute('aria-hidden', 'true'); icon.draggable = false;
-            // Match the badge icon in the badge grid: use the badge hash, never the tooltip graphic.
             icon.src = getBadgeImageUrl(tier.hash);
 
             const textWrap = document.createElement('div'); textWrap.className = 'tierTimelineText__64bbc';
@@ -973,7 +972,6 @@
         const tooltip = getBadgeAccessibility(badge);
         const title = tooltip.title || badge.name || 'Badge';
         const eyebrow = tooltip.eyebrow || '';
-        // The detail panel uses its own field. Never fall back to tooltipDescription here.
         const bodyValue = Object.prototype.hasOwnProperty.call(badge, 'detailDescription')
             ? badge.detailDescription
             : '';
@@ -992,7 +990,6 @@
         if (scroller.dataset.dpcDetailSignature === signature && scroller.querySelector('.badgeGraphic__6f97a') && scroller.querySelector('.badgeInfo__6f97a')) return;
         scroller.dataset.dpcDetailSignature = signature;
 
-        // Keep Discord's native vertical detail layout, but explicitly center the large graphic.
         scroller.style.setProperty('display', 'flex', 'important');
         scroller.style.setProperty('flex-direction', 'column', 'important');
         scroller.style.setProperty('align-items', 'stretch', 'important');
@@ -1053,7 +1050,6 @@
         heading.appendChild(document.createTextNode(title));
         titleGroup.appendChild(heading);
 
-        // Build only non-empty accessories, placing separators between entries rather than before the first one.
         const accessoryLine = document.createElement('div'); accessoryLine.className = 'badgeAccessoryLine__6f97a';
         const accessorySegments = [];
         if (accessoryText) {
@@ -1077,7 +1073,6 @@
         identity.appendChild(titleGroup);
         badgeInfo.appendChild(identity);
 
-        // Re-create the fixed detail UI shown in the supplied Discord DOM examples.
         const isBoostBadge = detailPreset === 'boost';
         const isPartnerBadge = detailPreset === 'partner';
         const legacyDetailBadgeNames = new Set([
@@ -1200,7 +1195,6 @@
             if (details.childElementCount) badgeInfo.appendChild(details);
         }
 
-        // Exact top-level structure from the supplied Discord DOM: header, graphic, badgeInfo.
         scroller.replaceChildren(header, bigImage, badgeInfo);
         if (tabId) detailPanel.setAttribute('aria-labelledby', tabId);
         else detailPanel.removeAttribute('aria-labelledby');
@@ -1489,8 +1483,6 @@
 
     const storedState = readSaved();
     const state = { ...defaults, ...storedState };
-    // The previous release defaulted to Japanese. Switch existing installs to
-    // English once, while preserving any language choice made after this release.
     if (storedState.dpcLanguageDefaultVersion !== 2) state.language = 'en';
     state.dpcLanguageDefaultVersion = 2;
     uploadedBadges = Array.isArray(state.customBadges) ? state.customBadges : [];
@@ -1499,8 +1491,6 @@
     }
     delete state.staffPreviewEnabled;
 
-    // Staff mode changes only the client-side environment values. It does not
-    // grant Discord permissions; the server remains responsible for access checks.
     let staffEnvironmentSnapshot = null;
     function applyStaffEnvironment() {
         const env = window.GLOBAL_ENV;
