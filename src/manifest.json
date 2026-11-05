@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Discord Profile Customize Tool",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "author": "SeihyouMirai",
-  "description": "Discordのプロフィールをカスタマイズする拡張機能。",
+  "description": "Customize Discord profile badges and badge details.",
   "permissions": [
     "storage",
     "scripting"
@@ -96,5 +96,14 @@
       "run_at": "document_end",
       "world": "MAIN"
     }
-  ]
+  ],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Period",
+        "mac": "MacCtrl+Period"
+      },
+      "description": "Open Discord Profile Customize settings"
+    }
+  }
 }
