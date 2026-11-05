@@ -13,10 +13,10 @@ This extension only supports Japanese and English (en_US).
 # Images
 
 ## Config
-<img src="/images/1.png" width="300">
+<img src="/images/1.png" width="250">
 
 ## Profile
-<img src="/images/4.png" width="250"> <img src="/images/2.png" width="300"> <img src="/images/3.png" width="350">
+<img src="/images/4.png" width="220"> <img src="/images/2.png" width="280"> <img src="/images/3.png" width="340">
 
 ---
 
