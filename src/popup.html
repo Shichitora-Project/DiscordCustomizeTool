@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <!-- Created by SeihyouMirai -->
   <meta charset="UTF-8">
@@ -222,7 +222,8 @@
     .badge-edit-fields > label.badge-edit-style-toggle { display:flex; align-items:center; gap:9px; cursor:pointer; }
     .badge-edit-style-toggle .switch { flex:none; }
     .badge-edit-fields > label.upload-button { display:inline-flex; width:max-content; align-items:center; }
-    .badge-edit-fields input[type=text], .badge-edit-fields input[type=url], .badge-edit-fields textarea { width:100%; min-width:0; box-sizing:border-box; padding:7px 8px; color:#f2f3f5; background:#2b2d31; border:1px solid #4e5058; border-radius:6px; font:inherit; font-size:11px; }
+    .badge-edit-fields input[type=text], .badge-edit-fields input[type=url], .badge-edit-fields textarea, .badge-edit-fields select { width:100%; min-width:0; box-sizing:border-box; padding:7px 8px; color:#f2f3f5; background:#2b2d31; border:1px solid #4e5058; border-radius:6px; font:inherit; font-size:11px; }
+    .badge-edit-fields select:disabled { opacity:.65; cursor:not-allowed; }
     .badge-edit-fields input:focus, .badge-edit-fields textarea:focus { outline:1px solid #5865f2; border-color:#5865f2; }
     .badge-edit-fields textarea { min-height:50px; resize:vertical; }
     .badge-edit-inline { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
