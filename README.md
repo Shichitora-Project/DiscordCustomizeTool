@@ -1,4 +1,4 @@
-# Discord Profile Customize Tool
+# Discord Customize Tool
 
 An extension for customizing your Discord profile.
 
