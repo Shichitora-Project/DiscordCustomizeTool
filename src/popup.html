@@ -184,7 +184,7 @@
     .server-tag-settings { display:grid; gap:8px; margin:0 0 14px; }
     .server-tag-settings > label { display:grid; gap:5px; color:#b5bac1; font-size:12px; }
     .server-tag-settings select, .server-tag-settings input { width:100%; box-sizing:border-box; padding:7px 8px; color:#f2f3f5; background:#2b2d31; border:1px solid #4e5058; border-radius:5px; }
-    #categorySelect, .profile-settings input, .profile-settings textarea { width:100%; box-sizing:border-box; padding:7px 8px; color:#f2f3f5; background:#2b2d31; border:1px solid #4e5058; border-radius:5px; }
+    #categorySelect, .profile-settings input, .profile-settings textarea, .profile-settings select { width:100%; box-sizing:border-box; padding:7px 8px; color:#f2f3f5; background:#2b2d31; border:1px solid #4e5058; border-radius:5px; }
     #categorySelect { margin-bottom:14px; }
     .settings-panel[hidden] { display:none; }
     .settings-panel { max-height:470px; overflow-y:auto; padding-right:4px; }
@@ -258,7 +258,7 @@
     .server-tag-settings { gap:6px; margin-bottom:10px; }
     .server-tag-settings > label, .profile-settings > label { gap:4px; font-size:11px; }
     .server-tag-settings select, .server-tag-settings input,
-    #categorySelect, .profile-settings input, .profile-settings textarea { padding:6px 7px; font-size:11px; }
+    #categorySelect, .profile-settings input, .profile-settings textarea, .profile-settings select { padding:6px 7px; font-size:11px; }
     #categorySelect { margin-bottom:10px; }
     .settings-panel { max-height:440px; padding-right:3px; }
     .profile-settings { gap:6px; }
@@ -301,6 +301,7 @@
     <option value="badges" data-i18n="categoryBadges">バッジ</option>
     <option value="serverTag" data-i18n="categoryServerTag">サーバータグ</option>
     <option value="profile" data-i18n="categoryProfile">プロフィール</option>
+    <option value="userType" data-i18n="categoryUserType">User Type</option>
   </select>
   <section class="settings-panel" data-category="general">
   <div class="settings-row"><span data-i18n="language">言語</span><select id="languageSelect" aria-label="Language">
@@ -341,6 +342,15 @@
     <label><span data-i18n="usernameText">ユーザー名</span><input id="usernameText" type="text" data-i18n-placeholder="profilePlaceholder" placeholder="任意の文字"></label>
     <div class="settings-row"><span data-i18n="bioEnabled">自己紹介を上書き</span><label class="switch"><input id="bioEnabled" type="checkbox"><span class="slider"></span></label></div>
     <label><span data-i18n="bioText">自己紹介</span><textarea id="bioText" data-i18n-placeholder="profilePlaceholder" placeholder="任意の文字"></textarea></label>
+  </section>
+  <section class="settings-panel profile-settings" data-category="userType" hidden>
+    <label><span data-i18n="userTypeLabel">User Type</span><select id="userTypeSelect">
+      <option value="normal" data-i18n="userTypeNormal">Normal</option>
+      <option value="bot">Bot</option>
+      <option value="verifiedBot">Verified Bot</option>
+      <option value="system">System</option>
+      <option value="ai">AI</option>
+    </select></label>
   </section>
   <script src="popup.js"></script>
   <p data-i18n="credit">Made by 清冰みらい</p>
