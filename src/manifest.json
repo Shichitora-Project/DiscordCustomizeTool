@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Discord Customize Tool",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "author": "SeihyouMirai",
   "description": "Customize Discord System.",
   "permissions": [
@@ -79,6 +79,18 @@
         "https://ptb.discord.com/*"
       ],
       "js": [
+        "user-type-bridge.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://discord.com/*",
+        "https://www.discord.com/*",
+        "https://canary.discord.com/*",
+        "https://ptb.discord.com/*"
+      ],
+      "js": [
         "bridge.js"
       ],
       "run_at": "document_end"
@@ -92,6 +104,19 @@
       ],
       "js": [
         "content.js"
+      ],
+      "run_at": "document_end",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://discord.com/*",
+        "https://www.discord.com/*",
+        "https://canary.discord.com/*",
+        "https://ptb.discord.com/*"
+      ],
+      "js": [
+        "user-type.js"
       ],
       "run_at": "document_end",
       "world": "MAIN"
